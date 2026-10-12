@@ -1,0 +1,1 @@
+"""HashScrap test package."""
