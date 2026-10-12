@@ -50,7 +50,7 @@ class FixtureHandler(BaseHTTPRequestHandler):
         if path == "/status/429":
             self.send_response(429)
             self.send_header("Retry-After", "0")
-            self.send_header("Content-Length", "9")
+            self.send_header("Content-Length", "10")
             self.send_connection_close()
             self.end_headers()
             self.wfile.write(b"rate limit")
