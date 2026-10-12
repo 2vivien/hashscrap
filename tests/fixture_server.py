@@ -1,13 +1,13 @@
 """Deterministic loopback-only HTTP fixture server for tests."""
+
 from __future__ import annotations
 
 import threading
 import time
+from collections.abc import Iterator
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Iterator
 from urllib.parse import urlsplit
-
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "corpus"
 
@@ -24,11 +24,13 @@ class FixtureHandler(BaseHTTPRequestHandler):
         # Test server logs are intentionally quiet and contain no request query strings.
         return
 
-    def _send(self, status: int, body: bytes = b"", content_type: str = "text/html; charset=utf-8") -> None:
+    def _send(
+        self, status: int, body: bytes = b"", content_type: str = "text/html; charset=utf-8"
+    ) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
-        self.send_connection_close()
+        self.send_header("Connection", "close")
         self.end_headers()
         if body:
             self.wfile.write(body)
@@ -51,7 +53,7 @@ class FixtureHandler(BaseHTTPRequestHandler):
             self.send_response(429)
             self.send_header("Retry-After", "0")
             self.send_header("Content-Length", "10")
-            self.send_connection_close()
+            self.send_header("Connection", "close")
             self.end_headers()
             self.wfile.write(b"rate limit")
             return
@@ -61,14 +63,14 @@ class FixtureHandler(BaseHTTPRequestHandler):
             self.send_response(302)
             self.send_header("Location", "/")
             self.send_header("Content-Length", "0")
-            self.send_connection_close()
+            self.send_header("Connection", "close")
             self.end_headers()
             return
         if path == "/redirect/private":
             self.send_response(302)
             self.send_header("Location", "http://127.0.0.1:1/private")
             self.send_header("Content-Length", "0")
-            self.send_connection_close()
+            self.send_header("Connection", "close")
             self.end_headers()
             return
         if path == "/oversized":
@@ -76,7 +78,9 @@ class FixtureHandler(BaseHTTPRequestHandler):
         if path == "/malformed":
             return self._send(200, (FIXTURE_DIR / "malformed.html").read_bytes())
         if path == "/charset/latin1":
-            return self._send(200, (FIXTURE_DIR / "latin1.html").read_bytes(), "text/html; charset=iso-8859-1")
+            return self._send(
+                200, (FIXTURE_DIR / "latin1.html").read_bytes(), "text/html; charset=iso-8859-1"
+            )
         if path == "/timeout":
             # A bounded delay, used only by explicit local timeout tests.
             time.sleep(0.2)

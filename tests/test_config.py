@@ -33,13 +33,16 @@ def test_valid_config_is_normalized() -> None:
     assert source.allowed_hosts == ["example.org"]
 
 
-@pytest.mark.parametrize("url", [
-    "file:///etc/passwd",
-    "ftp://example.org",
-    "https://user:secret@example.org",
-    "https://example.org/#fragment",
-    "https://example.org:invalid",
-])
+@pytest.mark.parametrize(
+    "url",
+    [
+        "file:///etc/passwd",
+        "ftp://example.org",
+        "https://user:secret@example.org",
+        "https://example.org/#fragment",
+        "https://example.org:invalid",
+    ],
+)
 def test_rejects_unsafe_or_malformed_base_urls(url: str) -> None:
     with pytest.raises(ValidationError):
         Source.model_validate(valid_source(base_url=url))

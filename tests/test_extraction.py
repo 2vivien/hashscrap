@@ -29,7 +29,11 @@ def test_extracts_title_description_canonical_and_links_with_provenance() -> Non
     assert fields["title"].normalized_value == "Example Organization"
     assert fields["meta_description"].normalized_value == "Public profile"
     assert fields["canonical_url"].normalized_value == "/profile"
-    assert any(item.normalized_value == "https://example.org/contact" for item in result.observations if item.field_name == "link_url")
+    assert any(
+        item.normalized_value == "https://example.org/contact"
+        for item in result.observations
+        if item.field_name == "link_url"
+    )
     assert all(item.document_id == result.document.id for item in result.observations)
     assert all(item.evidence_ref and item.extractor_version for item in result.observations)
 
@@ -102,4 +106,7 @@ def test_charset_is_respected_for_html() -> None:
         content_type="text/html; charset=iso-8859-1",
         body=b"<html><head><title>Caf\xe9</title></head></html>",
     )
-    assert next(item for item in result.observations if item.field_name == "title").normalized_value == "Café"
+    assert (
+        next(item for item in result.observations if item.field_name == "title").normalized_value
+        == "Café"
+    )

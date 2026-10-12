@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import http.client
 import socket
 import urllib.error
 import urllib.request
+from collections.abc import Iterator
 
 import pytest
 
@@ -10,10 +12,14 @@ from tests.fixture_server import fixture_server
 
 
 @pytest.fixture
-def fixture_base_url() -> str:
-    # Context is managed manually so shutdown is guaranteed by the generator fixture.
+def fixture_base_url() -> Iterator[str]:
+    # Generator fixture kept alive for the duration of the test so the server
+    # is only shut down after the test finished.
     server = fixture_server()
-    return next(server)
+    try:
+        yield next(server)
+    finally:
+        server.close()
 
 
 def fetch(url: str, timeout: float = 2.0) -> tuple[int, bytes, dict[str, str]]:
@@ -40,7 +46,9 @@ def test_relative_pagination_fixture_is_stable(fixture_base_url: str) -> None:
 
 
 def test_duplicate_urls_return_identical_content(fixture_base_url: str) -> None:
-    assert fetch(fixture_base_url + "/duplicate/a")[1] == fetch(fixture_base_url + "/duplicate/b")[1]
+    assert (
+        fetch(fixture_base_url + "/duplicate/a")[1] == fetch(fixture_base_url + "/duplicate/b")[1]
+    )
 
 
 def test_versions_are_different_and_controlled(fixture_base_url: str) -> None:
@@ -51,11 +59,14 @@ def test_versions_are_different_and_controlled(fixture_base_url: str) -> None:
     assert old != new
 
 
-@pytest.mark.parametrize(("path", "expected"), [
-    ("/status/404", 404),
-    ("/status/429", 429),
-    ("/status/500", 500),
-])
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        ("/status/404", 404),
+        ("/status/429", 429),
+        ("/status/500", 500),
+    ],
+)
 def test_error_status_routes_are_deterministic(
     fixture_base_url: str, path: str, expected: int
 ) -> None:
@@ -69,9 +80,17 @@ def test_safe_redirect_stays_on_fixture_server(fixture_base_url: str) -> None:
 
 
 def test_private_redirect_target_is_exposed_for_policy_tests(fixture_base_url: str) -> None:
-    with urllib.request.urlopen(fixture_base_url + "/redirect/private", timeout=2) as response:
+    # Use a non-following client so the 302 and its Location header are inspected
+    # directly instead of connecting to the private redirect target.
+    host, port = fixture_base_url.removeprefix("http://").split(":")
+    connection = http.client.HTTPConnection(host, int(port), timeout=2)
+    try:
+        connection.request("GET", "/redirect/private")
+        response = connection.getresponse()
         assert response.status == 302
-        assert response.headers["Location"].startswith("http://127.0.0.1:")
+        assert response.getheader("Location").startswith("http://127.0.0.1:")
+    finally:
+        connection.close()
 
 
 def test_response_size_route_is_bounded_and_repeatable(fixture_base_url: str) -> None:

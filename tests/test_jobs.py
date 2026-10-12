@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from hashscrap.jobs import JOB_STATUSES, _ALLOWED_TRANSITIONS, _ensure_same_payload
+from hashscrap.jobs import _ALLOWED_TRANSITIONS, JOB_STATUSES, _ensure_same_payload
 
 
 def test_job_statuses_and_transition_map_are_explicit() -> None:

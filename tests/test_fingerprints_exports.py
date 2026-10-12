@@ -4,10 +4,9 @@ import csv
 import io
 import json
 from datetime import UTC, datetime
-from uuid import uuid4
 
-from hashscrap.extraction import DocumentRecord, ExtractionResult, Observation
 from hashscrap.exports import export_csv, export_jsonl
+from hashscrap.extraction import DocumentRecord, ExtractionResult, Observation
 from hashscrap.fingerprints import DeduplicationIndex, fingerprint_content
 
 
@@ -75,7 +74,7 @@ def test_csv_escapes_formulas_and_handles_commas_quotes_and_unicode() -> None:
 
     assert len(rows) == 1
     assert rows[0]["raw_value"].startswith("'=")
-    assert 'Café, test' in rows[0]["raw_value"]
+    assert "Café, test" in rows[0]["raw_value"]
     assert rows[0]["evidence_ref"] == "css:title"
 
 

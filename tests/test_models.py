@@ -9,8 +9,14 @@ from hashscrap.models import Base, CrawlJob, Document, Observation, Source
 
 def test_initial_schema_contains_only_mvp_tables() -> None:
     assert set(Base.metadata.tables) == {
-        "sources", "crawl_jobs", "crawl_runs", "documents", "observations",
-        "entities", "entity_observations", "entity_relationships"
+        "sources",
+        "crawl_jobs",
+        "crawl_runs",
+        "documents",
+        "observations",
+        "entities",
+        "entity_observations",
+        "entity_relationships",
     }
 
 
@@ -20,11 +26,17 @@ def test_required_uniqueness_and_integrity_constraints_exist() -> None:
         item for item in CrawlJob.__table__.constraints if isinstance(item, UniqueConstraint)
     ]
     assert CheckConstraint in source_constraints
-    assert any(item.columns.keys() == ["source_key"] for item in Source.__table__.constraints
-               if isinstance(item, UniqueConstraint))
+    assert any(
+        item.columns.keys() == ["source_key"]
+        for item in Source.__table__.constraints
+        if isinstance(item, UniqueConstraint)
+    )
     assert any(item.columns.keys() == ["idempotency_key"] for item in job_unique_constraints)
     assert any(item.name == "ck_documents_sha256_length" for item in Document.__table__.constraints)
-    assert any(item.name == "ck_observations_validation_status" for item in Observation.__table__.constraints)
+    assert any(
+        item.name == "ck_observations_validation_status"
+        for item in Observation.__table__.constraints
+    )
 
 
 def test_database_url_is_required(monkeypatch: pytest.MonkeyPatch) -> None:
