@@ -25,7 +25,6 @@ def run_benchmark(count: int = 10_000, duplicate_every: int = 100) -> dict[str, 
 
     index = DeduplicationIndex()
     results = []
-    expected_titles: dict[str, str] = {}
     attempted = 0
     valid_pages = 0
     title_correct = 0
@@ -45,7 +44,7 @@ def run_benchmark(count: int = 10_000, duplicate_every: int = 100) -> dict[str, 
             "<!doctype html><html><head><title>"
             + expected_title
             + "</title><meta name=\"description\" content=\"Offline fixture\"></head>"
-            + f"<body><p>Record {content_number}</p><a href=\"/page/{number + 1}\">Next</a></body></html>"
+            + f"<body><p>Record {content_number}</p><a href=\"/page/{content_number + 1}\">Next</a></body></html>"
         ).encode("utf-8")
         body_bytes += len(body)
         url = f"https://benchmark.invalid/page/{number}"
@@ -66,7 +65,6 @@ def run_benchmark(count: int = 10_000, duplicate_every: int = 100) -> dict[str, 
             content_duplicates += 1
         if content_type.startswith("text/html"):
             valid_pages += 1
-            expected_titles[str(result.document.id)] = expected_title
             extracted = next(
                 (item.normalized_value for item in result.observations if item.field_name == "title"),
                 None,
