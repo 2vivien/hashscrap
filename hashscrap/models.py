@@ -17,6 +17,7 @@ from sqlalchemy import (
     String,
     Text,
     Uuid,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -222,6 +223,7 @@ class Entity(Base):
 class EntityObservation(Base):
     __tablename__ = "entity_observations"
     __table_args__ = (
+        UniqueConstraint("entity_id", "observation_id", name="uq_entity_observations_entity_observation"),
         Index("ix_entity_observations_observation", "observation_id"),
     )
 
