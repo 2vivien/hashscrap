@@ -7,7 +7,7 @@
     "build": "vite build",
     "start": "vite preview --host 0.0.0.0",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "vite build && tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.120.5",
