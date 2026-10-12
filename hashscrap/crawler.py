@@ -67,6 +67,8 @@ def _settings(source: Source) -> Settings:
         "DOWNLOAD_DELAY": 1.0 / limits.requests_per_second,
         "DOWNLOAD_TIMEOUT": limits.timeout_seconds,
         "DOWNLOAD_MAXSIZE": limits.max_response_bytes,
+        "HASHSCRAP_MAX_REQUESTS": limits.max_pages,
+        "DOWNLOAD_FAIL_ON_DATALOSS": True,
         "DEPTH_LIMIT": limits.max_depth,
         "DEPTH_PRIORITY": 1,
         "RETRY_ENABLED": True,
@@ -76,6 +78,7 @@ def _settings(source: Source) -> Settings:
         "LOG_LEVEL": "WARNING",
         "EXTENSIONS": {"hashscrap.crawler.ResultCollector": 500},
         "DOWNLOADER_MIDDLEWARES": {
+            "hashscrap.middleware.RequestBudgetMiddleware": 40,
             "hashscrap.middleware.URLSafetyMiddleware": 50,
             "scrapy.downloadermiddlewares.redirect.RedirectMiddleware": 600,
         },
