@@ -1,25 +1,16 @@
 import { describe, expect, it } from "vitest";
+import { getSectionConfig, isSourceOrCollection } from "../lib/sections";
 
-const expectedSections = [
-  "investigations",
-  "sources",
-  "collectes",
-  "entites",
-  "chronologie",
-  "preuves",
-  "rapports",
-  "parametres",
-];
-
-describe("HashScrap route contract", () => {
-  it("lists the sections whose holding states are implemented", () => {
-    expect(expectedSections).toContain("sources");
-    expect(expectedSections).toContain("collectes");
-    expect(new Set(expectedSections).size).toBe(expectedSections.length);
+describe("section metadata", () => {
+  it("explains that source and collection APIs are not connected", () => {
+    expect(getSectionConfig("sources").detail).toContain("API");
+    expect(getSectionConfig("collectes").detail).toContain("API");
+    expect(isSourceOrCollection("sources")).toBe(true);
+    expect(isSourceOrCollection("collectes")).toBe(true);
   });
 
-  it("does not present an API contract as implemented by this scaffold", () => {
-    const apiReady = false;
-    expect(apiReady).toBe(false);
+  it("provides an explicit fallback for unimplemented routes", () => {
+    expect(getSectionConfig("unknown").title).toBe("Vue indisponible");
+    expect(isSourceOrCollection("unknown")).toBe(false);
   });
 });
