@@ -28,7 +28,7 @@ Issues are delivered as stacked PRs whose base is the parent branch, not `main`.
 
 Python ≥ 3.11, setuptools; install with `python -m pip install -e ".[dev]"`.
 
-- CI order (`.github/workflows/ci.yml`, matrix 3.11/3.12): `ruff check .` → `ruff format --check .` → `mypy hashscrap` → `pytest`. mypy is **strict**.
+- CI order (`.github/workflows/ci.yml`, matrix 3.11/3.12): `ruff check .` → `ruff format --check .` → `mypy` (covers `hashscrap` **and** `tests`) → `pytest`. mypy is **strict**.
 - CLI entry point `hashscrap` (`hashscrap/cli.py`); the collection command is `hashscrap crawl --config <validated.json> --source <SOURCE_ID>`.
 - Migrations: `alembic upgrade head`, `alembic downgrade -1` (initial migration is destructive on rollback). DB URL from `HASHSCRAP_DATABASE_URL`.
 - Docker: `docker compose up --build`, then `docker compose run --rm app alembic upgrade head`; run `docker compose config` before merge. Never `docker compose down -v` unless data loss is intended.
