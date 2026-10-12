@@ -10,6 +10,14 @@ import time
 import psycopg
 
 
+def _libpq_url(database_url: str) -> str:
+    """Convert a SQLAlchemy URL (postgresql+psycopg://...) into a libpq URI."""
+    scheme, sep, rest = database_url.partition("://")
+    if not sep:
+        return database_url
+    return f"{scheme.split('+', 1)[0]}://{rest}"
+
+
 def main() -> int:
     database_url = os.environ.get("HASHSCRAP_DATABASE_URL", "")
     if not database_url:
@@ -19,7 +27,7 @@ def main() -> int:
     deadline = time.monotonic() + 90
     while True:
         try:
-            with psycopg.connect(database_url, connect_timeout=3):
+            with psycopg.connect(_libpq_url(database_url), connect_timeout=3):
                 break
         except psycopg.OperationalError:
             if time.monotonic() >= deadline:

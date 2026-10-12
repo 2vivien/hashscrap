@@ -20,6 +20,10 @@ env/
 .env.*
 !.env.example
 
+# Local benchmark artifacts and database dumps
+benchmark-results/
+backups/
+
 # Editors and operating systems
 .vscode/
 .idea/
