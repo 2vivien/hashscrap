@@ -15,7 +15,7 @@ PARSER_VERSION = "1"
 
 
 class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    model_config = ConfigDict(extra="forbid")
 
 
 class DocumentRecord(StrictModel):
