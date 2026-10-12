@@ -17,6 +17,7 @@ from sqlalchemy import (
     String,
     Text,
     Uuid,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -183,3 +184,97 @@ class Observation(Base):
     )
 
     document: Mapped[Document] = relationship(back_populates="observations")
+
+
+
+class Entity(Base):
+    __tablename__ = "entities"
+    __table_args__ = (
+        CheckConstraint(
+            "entity_type IN ('organization', 'domain', 'ip', 'url')",
+            name="ck_entities_type",
+        ),
+        CheckConstraint(
+            "review_status IN ('unreviewed', 'accepted_exact', 'needs_review', 'rejected')",
+            name="ck_entities_review_status",
+        ),
+        Index("ix_entities_type_identifier", "entity_type", "normalized_identifier"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    entity_type: Mapped[str] = mapped_column(String(24), nullable=False)
+    raw_identifier: Mapped[str] = mapped_column(String(4096), nullable=False)
+    normalized_identifier: Mapped[str] = mapped_column(String(4096), nullable=False)
+    normalization_method: Mapped[str] = mapped_column(String(80), nullable=False)
+    review_status: Mapped[str] = mapped_column(String(24), nullable=False, default="unreviewed")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    observations: Mapped[list[EntityObservation]] = relationship(back_populates="entity")
+    outgoing_relationships: Mapped[list[EntityRelationship]] = relationship(
+        back_populates="source_entity", foreign_keys="EntityRelationship.source_entity_id"
+    )
+    incoming_relationships: Mapped[list[EntityRelationship]] = relationship(
+        back_populates="target_entity", foreign_keys="EntityRelationship.target_entity_id"
+    )
+
+
+class EntityObservation(Base):
+    __tablename__ = "entity_observations"
+    __table_args__ = (
+        UniqueConstraint("entity_id", "observation_id", name="uq_entity_observations_entity_observation"),
+        Index("ix_entity_observations_observation", "observation_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    entity_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("entities.id", ondelete="CASCADE"), nullable=False
+    )
+    observation_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("observations.id", ondelete="CASCADE"), nullable=False
+    )
+    matching_method: Mapped[str] = mapped_column(String(80), nullable=False)
+    review_status: Mapped[str] = mapped_column(String(24), nullable=False, default="unreviewed")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    entity: Mapped[Entity] = relationship(back_populates="observations")
+    observation: Mapped[Observation] = relationship()
+
+
+class EntityRelationship(Base):
+    __tablename__ = "entity_relationships"
+    __table_args__ = (
+        CheckConstraint(
+            "review_status IN ('unreviewed', 'accepted_exact', 'needs_review', 'rejected')",
+            name="ck_entity_relationships_review_status",
+        ),
+        Index("ix_entity_relationships_source_type", "source_entity_id", "relation_type"),
+        Index("ix_entity_relationships_target", "target_entity_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    source_entity_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("entities.id", ondelete="CASCADE"), nullable=False
+    )
+    target_entity_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("entities.id", ondelete="CASCADE"), nullable=False
+    )
+    relation_type: Mapped[str] = mapped_column(String(120), nullable=False)
+    evidence_observation_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("observations.id", ondelete="RESTRICT"), nullable=False
+    )
+    review_status: Mapped[str] = mapped_column(String(24), nullable=False, default="unreviewed")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    source_entity: Mapped[Entity] = relationship(
+        back_populates="outgoing_relationships", foreign_keys=[source_entity_id]
+    )
+    target_entity: Mapped[Entity] = relationship(
+        back_populates="incoming_relationships", foreign_keys=[target_entity_id]
+    )
+    evidence_observation: Mapped[Observation] = relationship()

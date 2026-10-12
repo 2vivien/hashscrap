@@ -9,7 +9,8 @@ from hashscrap.models import Base, CrawlJob, Document, Observation, Source
 
 def test_initial_schema_contains_only_mvp_tables() -> None:
     assert set(Base.metadata.tables) == {
-        "sources", "crawl_jobs", "crawl_runs", "documents", "observations"
+        "sources", "crawl_jobs", "crawl_runs", "documents", "observations",
+        "entities", "entity_observations", "entity_relationships"
     }
 
 
