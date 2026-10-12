@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from uuid import uuid4
-
 import pytest
 
 from hashscrap.jobs import JOB_STATUSES, _ALLOWED_TRANSITIONS, _ensure_same_payload
