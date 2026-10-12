@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import threading
 import time
-from collections.abc import Iterator
+from collections.abc import Generator
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -88,13 +88,14 @@ class FixtureHandler(BaseHTTPRequestHandler):
         return self._send(404, b"unknown fixture route", "text/plain; charset=utf-8")
 
 
-def fixture_server() -> Iterator[str]:
+def fixture_server() -> Generator[str, None, None]:
     """Yield a loopback base URL and reliably stop the server afterward."""
     server = FixtureHTTPServer(("127.0.0.1", 0), FixtureHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        host, port = server.server_address
+        host = str(server.server_address[0])
+        port = int(server.server_address[1])
         yield f"http://{host}:{port}"
     finally:
         server.shutdown()

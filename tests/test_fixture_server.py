@@ -87,8 +87,10 @@ def test_private_redirect_target_is_exposed_for_policy_tests(fixture_base_url: s
     try:
         connection.request("GET", "/redirect/private")
         response = connection.getresponse()
+        location = response.getheader("Location")
         assert response.status == 302
-        assert response.getheader("Location").startswith("http://127.0.0.1:")
+        assert location is not None
+        assert location.startswith("http://127.0.0.1:")
     finally:
         connection.close()
 

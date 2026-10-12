@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -73,7 +74,7 @@ def test_rejects_source_exceeding_global_limits() -> None:
         AppConfig.model_validate({"limits": {"max_pages": 100}, "sources": [source]})
 
 
-def test_load_config_hides_raw_validation_details(tmp_path) -> None:
+def test_load_config_hides_raw_validation_details(tmp_path: Path) -> None:
     path = tmp_path / "bad.json"
     path.write_text(json.dumps({"secret": "do-not-echo"}), encoding="utf-8")
     with pytest.raises(ValueError, match="configuration validation failed") as exc:
@@ -81,7 +82,7 @@ def test_load_config_hides_raw_validation_details(tmp_path) -> None:
     assert "do-not-echo" not in str(exc.value)
 
 
-def test_load_config_rejects_malformed_json(tmp_path) -> None:
+def test_load_config_rejects_malformed_json(tmp_path: Path) -> None:
     path = tmp_path / "bad.json"
     path.write_text("{", encoding="utf-8")
     with pytest.raises(ValueError, match="could not be read or parsed"):

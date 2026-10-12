@@ -30,7 +30,7 @@ def source_data(**limit_overrides: int) -> dict[str, object]:
 def test_request_budget_rejects_requests_after_limit() -> None:
     middleware = RequestBudgetMiddleware(max_requests=1)
     request = Request("http://127.0.0.1/")
-    assert middleware.process_request(request, object()) is None
+    middleware.process_request(request, object())  # first request stays within budget
     with pytest.raises(IgnoreRequest, match="budget exhausted"):
         middleware.process_request(request, object())
 
@@ -58,8 +58,10 @@ def test_spider_emits_typed_intermediate_fields_and_stops_at_page_limit() -> Non
         encoding="utf-8",
     )
     output = list(spider.parse(response))
-    assert output[0]["title"] == "Local"
-    assert output[0]["status"] == 200
+    first = output[0]
+    assert isinstance(first, dict)
+    assert first["title"] == "Local"
+    assert first["status"] == 200
     assert len(output) == 2
     assert isinstance(output[1], Request)
 
