@@ -12,6 +12,7 @@ license = { text = "Proprietary" }
 authors = [{ name = "HashCode" }]
 dependencies = [
   "pydantic>=2.8,<3.0",
+  "Scrapy>=2.12,<3.0",
 ]
 
 [project.optional-dependencies]
