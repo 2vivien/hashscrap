@@ -1,4 +1,5 @@
 """Command-line entry point for HashScrap."""
+
 from __future__ import annotations
 
 import argparse
@@ -64,15 +65,20 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if job is None:
                     print("hashscrap: job not found", file=sys.stderr)
                     return 2
-                print(json.dumps({
-                    "id": str(job.id),
-                    "status": job.status,
-                    "attempts": job.attempts,
-                    "max_attempts": job.max_attempts,
-                    "error_code": job.error_code,
-                    "created_at": job.created_at.isoformat() if job.created_at else None,
-                    "updated_at": job.updated_at.isoformat() if job.updated_at else None,
-                }, sort_keys=True))
+                print(
+                    json.dumps(
+                        {
+                            "id": str(job.id),
+                            "status": job.status,
+                            "attempts": job.attempts,
+                            "max_attempts": job.max_attempts,
+                            "error_code": job.error_code,
+                            "created_at": job.created_at.isoformat() if job.created_at else None,
+                            "updated_at": job.updated_at.isoformat() if job.updated_at else None,
+                        },
+                        sort_keys=True,
+                    )
+                )
             engine.dispose()
             return 0
         except (ValueError, RuntimeError) as exc:

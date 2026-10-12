@@ -1,4 +1,5 @@
 """Offline, deterministic benchmark for extraction, fingerprints and export volume."""
+
 from __future__ import annotations
 
 import argparse
@@ -11,9 +12,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from hashscrap.extraction import extract_html
 from hashscrap.exports import export_jsonl
-from hashscrap.fingerprints import DeduplicationIndex, fingerprint_content
+from hashscrap.extraction import extract_html
+from hashscrap.fingerprints import DeduplicationIndex
 
 
 def run_benchmark(count: int = 10_000, duplicate_every: int = 100) -> dict[str, Any]:
@@ -43,8 +44,9 @@ def run_benchmark(count: int = 10_000, duplicate_every: int = 100) -> dict[str, 
         body = (
             "<!doctype html><html><head><title>"
             + expected_title
-            + "</title><meta name=\"description\" content=\"Offline fixture\"></head>"
-            + f"<body><p>Record {content_number}</p><a href=\"/page/{content_number + 1}\">Next</a></body></html>"
+            + '</title><meta name="description" content="Offline fixture"></head>'
+            + f"<body><p>Record {content_number}</p>"
+            + f'<a href="/page/{content_number + 1}">Next</a></body></html>'
         ).encode("utf-8")
         body_bytes += len(body)
         url = f"https://benchmark.invalid/page/{number}"
@@ -66,7 +68,11 @@ def run_benchmark(count: int = 10_000, duplicate_every: int = 100) -> dict[str, 
         if content_type.startswith("text/html"):
             valid_pages += 1
             extracted = next(
-                (item.normalized_value for item in result.observations if item.field_name == "title"),
+                (
+                    item.normalized_value
+                    for item in result.observations
+                    if item.field_name == "title"
+                ),
                 None,
             )
             if extracted == expected_title:
@@ -88,7 +94,11 @@ def run_benchmark(count: int = 10_000, duplicate_every: int = 100) -> dict[str, 
             "platform": platform.platform(),
             "processor": platform.processor() or "unknown",
         },
-        "configuration": {"count": count, "duplicate_every": duplicate_every, "network": "disabled"},
+        "configuration": {
+            "count": count,
+            "duplicate_every": duplicate_every,
+            "network": "disabled",
+        },
         "metrics": {
             "urls_attempted": attempted,
             "valid_html_pages": valid_pages,

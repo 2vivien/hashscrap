@@ -1,4 +1,5 @@
 """Typed document and observation models with source provenance."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -98,7 +99,7 @@ def extract_html(
     parsed_host = _host(url)
     if not parsed_host:
         raise ValueError("document URL is malformed")
-    if not content_type.lower().split(";", maxsplit=1)[0].strip() in {
+    if content_type.lower().split(";", maxsplit=1)[0].strip() not in {
         "text/html",
         "application/xhtml+xml",
     }:
@@ -116,7 +117,9 @@ def extract_html(
         text = body.decode("utf-8", errors="replace")
     selector = Selector(text=text, type="html")
     canonical_href = selector.css('link[rel~="canonical"]::attr(href)').get()
-    canonical_url = urljoin(url, canonical_href.strip()) if canonical_href and canonical_href.strip() else None
+    canonical_url = (
+        urljoin(url, canonical_href.strip()) if canonical_href and canonical_href.strip() else None
+    )
     document = DocumentRecord(
         original_url=url,
         canonical_url=canonical_url,
@@ -130,14 +133,16 @@ def extract_html(
     def add(field_name: str, raw_value: str, evidence_ref: str) -> None:
         normalized = _normalize(raw_value)
         if normalized:
-            observations.append(Observation(
-                document_id=document.id,
-                field_name=field_name,
-                raw_value=raw_value[:20_000],
-                normalized_value=normalized[:20_000],
-                observed_at=document.fetched_at,
-                evidence_ref=evidence_ref,
-            ))
+            observations.append(
+                Observation(
+                    document_id=document.id,
+                    field_name=field_name,
+                    raw_value=raw_value[:20_000],
+                    normalized_value=normalized[:20_000],
+                    observed_at=document.fetched_at,
+                    evidence_ref=evidence_ref,
+                )
+            )
 
     title = "".join(selector.css("title::text").getall())
     add("title", title, "css:title")

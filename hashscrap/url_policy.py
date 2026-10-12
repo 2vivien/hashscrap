@@ -3,6 +3,7 @@
 This module makes a decision; it does not perform HTTP requests. The downloader must
 revalidate every redirect and enforce the resolved destination close to connection time.
 """
+
 from __future__ import annotations
 
 import ipaddress
@@ -45,7 +46,7 @@ def _system_resolver(hostname: str, port: int) -> Iterable[str]:
         results = socket.getaddrinfo(hostname, port, type=socket.SOCK_STREAM)
     except socket.gaierror as exc:
         raise URLPolicyError("dns_resolution_failed") from exc
-    return {item[4][0] for item in results}
+    return {str(item[4][0]) for item in results}
 
 
 def _parse_ip(value: str) -> IPAddress:
@@ -94,6 +95,7 @@ def validate_url(
             literal = ipaddress.ip_address(hostname)
         except ValueError:
             literal = None
+        addresses: tuple[str, ...]
         if literal is not None:
             addresses = (str(literal),)
         else:

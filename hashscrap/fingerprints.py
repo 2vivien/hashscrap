@@ -1,4 +1,5 @@
 """Stable content fingerprints and non-destructive duplicate detection."""
+
 from __future__ import annotations
 
 import hashlib

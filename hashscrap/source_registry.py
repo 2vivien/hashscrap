@@ -1,4 +1,5 @@
 """In-memory registry for explicitly configured collection sources."""
+
 from __future__ import annotations
 
 from hashscrap.config import AppConfig, Source

@@ -1,4 +1,5 @@
 """Deterministic exports that retain document and observation provenance."""
+
 from __future__ import annotations
 
 import csv
@@ -116,7 +117,12 @@ def _spreadsheet_safe(value: Any) -> str:
     return text
 
 
-def _row(result: ExtractionResult, observation: Observation | None, source_ids: Mapping[UUID, str], fingerprints: Mapping[UUID, str]) -> dict[str, str]:
+def _row(
+    result: ExtractionResult,
+    observation: Observation | None,
+    source_ids: Mapping[UUID, str],
+    fingerprints: Mapping[UUID, str],
+) -> dict[str, str]:
     document = result.document
     values: dict[str, Any] = {
         "document_id": document.id,
@@ -152,7 +158,9 @@ def export_csv(
     sources = source_ids or {}
     hashes = fingerprints or {}
     output = io.StringIO(newline="")
-    writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, extrasaction="raise", lineterminator="\n")
+    writer = csv.DictWriter(
+        output, fieldnames=CSV_FIELDS, extrasaction="raise", lineterminator="\n"
+    )
     writer.writeheader()
     ordered = sorted(results, key=lambda item: (item.document.original_url, str(item.document.id)))
     for result in ordered:

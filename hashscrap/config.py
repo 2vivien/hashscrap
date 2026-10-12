@@ -2,6 +2,7 @@
 
 This module intentionally has no dependency on Scrapy, network clients, or persistence.
 """
+
 from __future__ import annotations
 
 import json
@@ -10,7 +11,6 @@ from typing import Literal
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-
 
 MAX_TIMEOUT_SECONDS = 120
 MAX_CONCURRENCY = 16
@@ -53,7 +53,7 @@ class Source(StrictModel):
         if parts.fragment:
             raise ValueError("base_url must not contain a fragment")
         try:
-            parts.port
+            _ = parts.port
         except ValueError as exc:
             raise ValueError("base_url contains an invalid port") from exc
         return value.rstrip("/")
@@ -69,7 +69,7 @@ class Source(StrictModel):
         return normalized
 
     @model_validator(mode="after")
-    def base_host_is_allowed(self) -> "Source":
+    def base_host_is_allowed(self) -> Source:
         host = (urlsplit(self.base_url).hostname or "").lower().rstrip(".")
         if host not in self.allowed_hosts:
             raise ValueError("base_url host must be included in allowed_hosts")
@@ -81,7 +81,7 @@ class AppConfig(StrictModel):
     sources: list[Source] = Field(default_factory=list, max_length=500)
 
     @model_validator(mode="after")
-    def unique_source_ids(self) -> "AppConfig":
+    def unique_source_ids(self) -> AppConfig:
         ids = [source.id for source in self.sources]
         if len(ids) != len(set(ids)):
             raise ValueError("source ids must be unique")

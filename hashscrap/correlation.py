@@ -1,4 +1,5 @@
 """Deterministic, explainable entity matching for supported identifier types."""
+
 from __future__ import annotations
 
 import ipaddress

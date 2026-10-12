@@ -3,10 +3,11 @@
 Revision ID: 0002_entity_correlation
 Revises: 0001_initial_schema
 """
+
 from __future__ import annotations
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "0002_entity_correlation"
 down_revision = "0001_initial_schema"
@@ -23,12 +24,21 @@ def upgrade() -> None:
         sa.Column("normalized_identifier", sa.String(length=4096), nullable=False),
         sa.Column("normalization_method", sa.String(length=80), nullable=False),
         sa.Column("review_status", sa.String(length=24), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.CheckConstraint("entity_type IN ('organization', 'domain', 'ip', 'url')", name="ck_entities_type"),
-        sa.CheckConstraint("review_status IN ('unreviewed', 'accepted_exact', 'needs_review', 'rejected')", name="ck_entities_review_status"),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.CheckConstraint(
+            "entity_type IN ('organization', 'domain', 'ip', 'url')", name="ck_entities_type"
+        ),
+        sa.CheckConstraint(
+            "review_status IN ('unreviewed', 'accepted_exact', 'needs_review', 'rejected')",
+            name="ck_entities_review_status",
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_entities_type_identifier", "entities", ["entity_type", "normalized_identifier"])
+    op.create_index(
+        "ix_entities_type_identifier", "entities", ["entity_type", "normalized_identifier"]
+    )
 
     op.create_table(
         "entity_observations",
@@ -37,11 +47,15 @@ def upgrade() -> None:
         sa.Column("observation_id", sa.Uuid(), nullable=False),
         sa.Column("matching_method", sa.String(length=80), nullable=False),
         sa.Column("review_status", sa.String(length=24), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.ForeignKeyConstraint(["entity_id"], ["entities.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["observation_id"], ["observations.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("entity_id", "observation_id", name="uq_entity_observations_entity_observation"),
+        sa.UniqueConstraint(
+            "entity_id", "observation_id", name="uq_entity_observations_entity_observation"
+        ),
     )
     op.create_index("ix_entity_observations_observation", "entity_observations", ["observation_id"])
 
@@ -53,14 +67,25 @@ def upgrade() -> None:
         sa.Column("relation_type", sa.String(length=120), nullable=False),
         sa.Column("evidence_observation_id", sa.Uuid(), nullable=False),
         sa.Column("review_status", sa.String(length=24), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.CheckConstraint("review_status IN ('unreviewed', 'accepted_exact', 'needs_review', 'rejected')", name="ck_entity_relationships_review_status"),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.CheckConstraint(
+            "review_status IN ('unreviewed', 'accepted_exact', 'needs_review', 'rejected')",
+            name="ck_entity_relationships_review_status",
+        ),
         sa.ForeignKeyConstraint(["source_entity_id"], ["entities.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["target_entity_id"], ["entities.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["evidence_observation_id"], ["observations.id"], ondelete="RESTRICT"),
+        sa.ForeignKeyConstraint(
+            ["evidence_observation_id"], ["observations.id"], ondelete="RESTRICT"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_entity_relationships_source_type", "entity_relationships", ["source_entity_id", "relation_type"])
+    op.create_index(
+        "ix_entity_relationships_source_type",
+        "entity_relationships",
+        ["source_entity_id", "relation_type"],
+    )
     op.create_index("ix_entity_relationships_target", "entity_relationships", ["target_entity_id"])
 
 

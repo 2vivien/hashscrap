@@ -1,4 +1,5 @@
 """Bounded Scrapy runner for explicitly configured sources."""
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
@@ -34,12 +35,20 @@ class ResultCollector:
         self.responses = 0
 
     @classmethod
-    def from_crawler(cls, crawler: Any) -> "ResultCollector":
+    def from_crawler(cls, crawler: Any) -> ResultCollector:
         instance = cls()
-        crawler.signals.connect(instance.item_scraped, signal=__import__("scrapy").signals.item_scraped)
-        crawler.signals.connect(instance.response_received, signal=__import__("scrapy").signals.response_received)
-        crawler.signals.connect(instance.spider_error, signal=__import__("scrapy").signals.spider_error)
-        crawler.signals.connect(instance.request_dropped, signal=__import__("scrapy").signals.request_dropped)
+        crawler.signals.connect(
+            instance.item_scraped, signal=__import__("scrapy").signals.item_scraped
+        )
+        crawler.signals.connect(
+            instance.response_received, signal=__import__("scrapy").signals.response_received
+        )
+        crawler.signals.connect(
+            instance.spider_error, signal=__import__("scrapy").signals.spider_error
+        )
+        crawler.signals.connect(
+            instance.request_dropped, signal=__import__("scrapy").signals.request_dropped
+        )
         crawler.result_collector = instance
         return instance
 
@@ -58,31 +67,33 @@ class ResultCollector:
 
 def _settings(source: Source) -> Settings:
     limits = source.limits
-    return Settings({
-        "BOT_NAME": "hashscrap",
-        "ROBOTSTXT_OBEY": True,
-        "USER_AGENT": "HashScrap/0.1 (+bounded public-source collection)",
-        "CONCURRENT_REQUESTS": limits.concurrency,
-        "CONCURRENT_REQUESTS_PER_DOMAIN": limits.concurrency,
-        "DOWNLOAD_DELAY": 1.0 / limits.requests_per_second,
-        "DOWNLOAD_TIMEOUT": limits.timeout_seconds,
-        "DOWNLOAD_MAXSIZE": limits.max_response_bytes,
-        "HASHSCRAP_MAX_REQUESTS": limits.max_pages,
-        "DOWNLOAD_FAIL_ON_DATALOSS": True,
-        "DEPTH_LIMIT": limits.max_depth,
-        "DEPTH_PRIORITY": 1,
-        "RETRY_ENABLED": True,
-        "RETRY_TIMES": 2,
-        "REDIRECT_ENABLED": True,
-        "TELNETCONSOLE_ENABLED": False,
-        "LOG_LEVEL": "WARNING",
-        "EXTENSIONS": {"hashscrap.crawler.ResultCollector": 500},
-        "DOWNLOADER_MIDDLEWARES": {
-            "hashscrap.middleware.RequestBudgetMiddleware": 40,
-            "hashscrap.middleware.URLSafetyMiddleware": 50,
-            "scrapy.downloadermiddlewares.redirect.RedirectMiddleware": 600,
-        },
-    })
+    return Settings(
+        {
+            "BOT_NAME": "hashscrap",
+            "ROBOTSTXT_OBEY": True,
+            "USER_AGENT": "HashScrap/0.1 (+bounded public-source collection)",
+            "CONCURRENT_REQUESTS": limits.concurrency,
+            "CONCURRENT_REQUESTS_PER_DOMAIN": limits.concurrency,
+            "DOWNLOAD_DELAY": 1.0 / limits.requests_per_second,
+            "DOWNLOAD_TIMEOUT": limits.timeout_seconds,
+            "DOWNLOAD_MAXSIZE": limits.max_response_bytes,
+            "HASHSCRAP_MAX_REQUESTS": limits.max_pages,
+            "DOWNLOAD_FAIL_ON_DATALOSS": True,
+            "DEPTH_LIMIT": limits.max_depth,
+            "DEPTH_PRIORITY": 1,
+            "RETRY_ENABLED": True,
+            "RETRY_TIMES": 2,
+            "REDIRECT_ENABLED": True,
+            "TELNETCONSOLE_ENABLED": False,
+            "LOG_LEVEL": "WARNING",
+            "EXTENSIONS": {"hashscrap.crawler.ResultCollector": 500},
+            "DOWNLOADER_MIDDLEWARES": {
+                "hashscrap.middleware.RequestBudgetMiddleware": 40,
+                "hashscrap.middleware.URLSafetyMiddleware": 50,
+                "scrapy.downloadermiddlewares.redirect.RedirectMiddleware": 600,
+            },
+        }
+    )
 
 
 def collect(

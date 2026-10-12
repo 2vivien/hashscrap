@@ -1,4 +1,5 @@
 """Persistent crawl-job lifecycle and recovery helpers."""
+
 from __future__ import annotations
 
 import re
@@ -43,9 +44,7 @@ def create_job(
     if max_attempts < 1:
         raise ValueError("max_attempts must be positive")
 
-    existing = session.scalar(
-        select(CrawlJob).where(CrawlJob.idempotency_key == idempotency_key)
-    )
+    existing = session.scalar(select(CrawlJob).where(CrawlJob.idempotency_key == idempotency_key))
     if existing is not None:
         _ensure_same_payload(existing, input_url, source_id, max_attempts, priority)
         return existing, False
@@ -106,9 +105,7 @@ def transition_job(
         raise ValueError("error_code must be a lowercase safe identifier")
 
     with session.begin_nested():
-        job = session.scalar(
-            select(CrawlJob).where(CrawlJob.id == job_id).with_for_update()
-        )
+        job = session.scalar(select(CrawlJob).where(CrawlJob.id == job_id).with_for_update())
         if job is None:
             raise LookupError("job not found")
         if target_status not in _ALLOWED_TRANSITIONS[job.status]:

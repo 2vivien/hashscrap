@@ -1,4 +1,5 @@
 """Database configuration; credentials are supplied only through environment variables."""
+
 from __future__ import annotations
 
 import os

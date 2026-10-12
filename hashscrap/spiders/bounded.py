@@ -1,4 +1,5 @@
 """Generic spider restricted to an explicitly configured host scope."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -16,8 +17,8 @@ class BoundedSpider(scrapy.Spider):
         self,
         source: dict[str, Any],
         start_urls: list[str],
-        *args: object,
-        **kwargs: object,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.source = source
@@ -32,13 +33,15 @@ class BoundedSpider(scrapy.Spider):
         for url in self.start_urls:
             yield scrapy.Request(url, callback=self.parse, errback=self.on_error, dont_filter=False)
 
-    def parse(self, response: Response, **kwargs: object) -> Iterable[dict[str, Any] | scrapy.Request]:
+    def parse(
+        self, response: Response, **kwargs: object
+    ) -> Iterable[dict[str, Any] | scrapy.Request]:
         self.pages_seen += 1
         yield {
             "source_id": self.source["id"],
             "url": response.url,
             "status": response.status,
-            "content_type": response.headers.get("Content-Type", b"").decode("latin-1"),
+            "content_type": (response.headers.get("Content-Type") or b"").decode("latin-1"),
             "body_bytes": len(response.body),
             "title": response.css("title::text").get(default="").strip(),
             "links_count": len(response.css("a::attr(href)").getall()),

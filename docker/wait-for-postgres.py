@@ -1,4 +1,5 @@
 """Bounded PostgreSQL readiness gate for the application container."""
+
 from __future__ import annotations
 
 import os

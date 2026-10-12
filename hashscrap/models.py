@@ -1,4 +1,5 @@
 """SQLAlchemy 2.x models for the initial HashScrap persistence schema."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -6,6 +7,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    JSON,
     BigInteger,
     Boolean,
     CheckConstraint,
@@ -13,11 +15,10 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
-    Uuid,
     UniqueConstraint,
+    Uuid,
     func,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -55,8 +56,10 @@ class CrawlJob(Base):
             "status IN ('queued', 'running', 'succeeded', 'failed', 'cancelled')",
             name="ck_crawl_jobs_status",
         ),
-        CheckConstraint("attempts >= 0 AND max_attempts > 0 AND attempts <= max_attempts",
-                        name="ck_crawl_jobs_attempts"),
+        CheckConstraint(
+            "attempts >= 0 AND max_attempts > 0 AND attempts <= max_attempts",
+            name="ck_crawl_jobs_attempts",
+        ),
         Index("ix_crawl_jobs_status_created", "status", "created_at"),
     )
 
@@ -89,8 +92,10 @@ class CrawlRun(Base):
             "status IN ('running', 'succeeded', 'failed', 'cancelled')",
             name="ck_crawl_runs_status",
         ),
-        CheckConstraint("fetched_count >= 0 AND failed_count >= 0 AND bytes_received >= 0",
-                        name="ck_crawl_runs_nonnegative_counts"),
+        CheckConstraint(
+            "fetched_count >= 0 AND failed_count >= 0 AND bytes_received >= 0",
+            name="ck_crawl_runs_nonnegative_counts",
+        ),
         Index("ix_crawl_runs_job_started", "job_id", "started_at"),
     )
 
@@ -115,10 +120,14 @@ class CrawlRun(Base):
 class Document(Base):
     __tablename__ = "documents"
     __table_args__ = (
-        CheckConstraint("status_code IS NULL OR (status_code >= 100 AND status_code <= 599)",
-                        name="ck_documents_status_code"),
-        CheckConstraint("content_sha256 IS NULL OR length(content_sha256) = 64",
-                        name="ck_documents_sha256_length"),
+        CheckConstraint(
+            "status_code IS NULL OR (status_code >= 100 AND status_code <= 599)",
+            name="ck_documents_status_code",
+        ),
+        CheckConstraint(
+            "content_sha256 IS NULL OR length(content_sha256) = 64",
+            name="ck_documents_sha256_length",
+        ),
         Index("ix_documents_canonical_url", "canonical_url"),
         Index("ix_documents_content_sha256", "content_sha256"),
         Index("ix_documents_source_last_seen", "source_id", "last_seen_at"),
@@ -179,12 +188,9 @@ class Observation(Base):
     extractor: Mapped[str] = mapped_column(String(120), nullable=False)
     extractor_version: Mapped[str] = mapped_column(String(40), nullable=False)
     evidence_ref: Mapped[str] = mapped_column(String(500), nullable=False)
-    validation_status: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="unreviewed"
-    )
+    validation_status: Mapped[str] = mapped_column(String(16), nullable=False, default="unreviewed")
 
     document: Mapped[Document] = relationship(back_populates="observations")
-
 
 
 class Entity(Base):
@@ -223,7 +229,9 @@ class Entity(Base):
 class EntityObservation(Base):
     __tablename__ = "entity_observations"
     __table_args__ = (
-        UniqueConstraint("entity_id", "observation_id", name="uq_entity_observations_entity_observation"),
+        UniqueConstraint(
+            "entity_id", "observation_id", name="uq_entity_observations_entity_observation"
+        ),
         Index("ix_entity_observations_observation", "observation_id"),
     )
 

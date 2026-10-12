@@ -1,13 +1,14 @@
 """Versioned, deterministic report rendering from evidence-backed input data."""
+
 from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-REPORT_SCHEMA_VERSION = "1.0"
+REPORT_SCHEMA_VERSION: Final[Literal["1.0"]] = "1.0"
 
 
 class ReportModel(BaseModel):
@@ -87,32 +88,49 @@ def _time(value: datetime | None) -> str:
 
 
 def _sort_report(report: InvestigationReport) -> InvestigationReport:
-    return report.model_copy(update={
-        "sources": sorted(report.sources, key=lambda item: (item.source_id, item.source_name)),
-        "observations": sorted(
-            report.observations,
-            key=lambda item: (item.source_id, item.observed_at.isoformat(), item.field_name,
-                              item.evidence_ref, item.observation_id),
-        ),
-        "relationships": sorted(
-            report.relationships,
-            key=lambda item: (item.source_entity, item.relation_type, item.target_entity,
-                              item.evidence_observation_id, item.relationship_id),
-        ),
-        "errors": sorted(report.errors, key=lambda item: (item.source_id, item.error_code, item.message)),
-        "limitations": sorted(set(report.limitations)),
-    })
+    return report.model_copy(
+        update={
+            "sources": sorted(report.sources, key=lambda item: (item.source_id, item.source_name)),
+            "observations": sorted(
+                report.observations,
+                key=lambda item: (
+                    item.source_id,
+                    item.observed_at.isoformat(),
+                    item.field_name,
+                    item.evidence_ref,
+                    item.observation_id,
+                ),
+            ),
+            "relationships": sorted(
+                report.relationships,
+                key=lambda item: (
+                    item.source_entity,
+                    item.relation_type,
+                    item.target_entity,
+                    item.evidence_observation_id,
+                    item.relationship_id,
+                ),
+            ),
+            "errors": sorted(
+                report.errors, key=lambda item: (item.source_id, item.error_code, item.message)
+            ),
+            "limitations": sorted(set(report.limitations)),
+        }
+    )
 
 
 def render_report_json(report: InvestigationReport) -> str:
     """Render stable UTF-8 JSON with sorted keys and no invented missing values."""
     ordered = _sort_report(report)
-    return json.dumps(
-        ordered.model_dump(mode="json"),
-        ensure_ascii=False,
-        sort_keys=True,
-        indent=2,
-    ) + "\n"
+    return (
+        json.dumps(
+            ordered.model_dump(mode="json"),
+            ensure_ascii=False,
+            sort_keys=True,
+            indent=2,
+        )
+        + "\n"
+    )
 
 
 def _md_cell(value: str) -> str:
@@ -151,18 +169,21 @@ def render_report_markdown(report: InvestigationReport) -> str:
         lines.append("Aucune observation disponible.")
     else:
         for observation in ordered.observations:
-            lines.extend([
-                f"### {_md_cell(observation.field_name)}",
-                "",
-                f"- **Classification :** {observation.classification}",
-                f"- **Valeur :** {_md_cell(observation.value)}",
-                f"- **Source :** {_md_cell(observation.source_id)} — {_md_cell(observation.source_url)}",
-                f"- **Date :** {_time(observation.observed_at)}",
-                f"- **Preuve :** {_md_cell(observation.evidence_ref)}",
-                f"- **Validation :** {observation.validation_status}",
-                f"- **Observation ID :** {_md_cell(observation.observation_id)}",
-                "",
-            ])
+            lines.extend(
+                [
+                    f"### {_md_cell(observation.field_name)}",
+                    "",
+                    f"- **Classification :** {observation.classification}",
+                    f"- **Valeur :** {_md_cell(observation.value)}",
+                    f"- **Source :** {_md_cell(observation.source_id)} — "
+                    f"{_md_cell(observation.source_url)}",
+                    f"- **Date :** {_time(observation.observed_at)}",
+                    f"- **Preuve :** {_md_cell(observation.evidence_ref)}",
+                    f"- **Validation :** {observation.validation_status}",
+                    f"- **Observation ID :** {_md_cell(observation.observation_id)}",
+                    "",
+                ]
+            )
 
     lines.extend(["## Relations", ""])
     if not ordered.relationships:
@@ -191,9 +212,13 @@ def render_report_markdown(report: InvestigationReport) -> str:
         lines.extend(f"- {_md_cell(item)}" for item in ordered.limitations)
     else:
         lines.append("- Les limites supplémentaires ne sont pas renseignées.")
-    lines.extend([
-        "- Ce rapport reflète uniquement les sources et observations listées ; il ne prouve pas une couverture exhaustive.",
-        "- Les hypothèses et correspondances à revoir ne doivent pas être interprétées comme des faits confirmés.",
-        "",
-    ])
+    lines.extend(
+        [
+            "- Ce rapport reflète uniquement les sources et observations listées ; "
+            "il ne prouve pas une couverture exhaustive.",
+            "- Les hypothèses et correspondances à revoir ne doivent pas être "
+            "interprétées comme des faits confirmés.",
+            "",
+        ]
+    )
     return "\n".join(lines)

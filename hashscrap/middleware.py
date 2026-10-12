@@ -1,4 +1,5 @@
 """Downloader middleware enforcing URL and request-budget policies."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -31,7 +32,7 @@ class RequestBudgetMiddleware:
         self.requests_started = 0
 
     @classmethod
-    def from_crawler(cls, crawler: Any) -> "RequestBudgetMiddleware":
+    def from_crawler(cls, crawler: Any) -> RequestBudgetMiddleware:
         return cls(crawler.settings.getint("HASHSCRAP_MAX_REQUESTS", 100))
 
     def process_request(self, request: Request, spider: object) -> None:
