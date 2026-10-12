@@ -57,7 +57,6 @@ class BoundedSpider(scrapy.Spider):
                     callback=self.parse,
                     errback=self.on_error,
                     dont_filter=False,
-                    meta={"depth": depth + 1},
                 )
 
     def on_error(self, failure: Any) -> None:
