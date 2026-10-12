@@ -33,3 +33,21 @@ Le test 100k est manuel et ne doit pas être ajouté au chemin CI normal. Il peu
 ## Limite et suite
 
 Ce benchmark valide les composants extraction/empreinte/export hors ligne. Il ne remplace pas le benchmark de bout en bout Scrapy + PostgreSQL, qui nécessite un transport de fixtures local explicitement autorisé en test sans affaiblir la politique SSRF de production. Aucun résultat 10k/100k n'est réputé mesuré avant exécution réelle.
+
+## Résultats mesurés
+
+Exécution du 2026-10-12 sur Windows 10 (10.0.22621), Intel64 Family 6 Model 94, Python 3.11.9, réseau désactivé :
+
+| Métrique | 10k | 100k |
+|---|---:|---:|
+| URLs tentées | 10 000 | 100 000 |
+| pages HTML valides | 9 896 | 98 969 |
+| débit (pages/s) | 151,1 | 178,5 |
+| temps wall | 66,2 s | 560,3 s |
+| temps CPU | 32,4 s | 317,8 s |
+| exactitude titre | 1,0 | 1,0 |
+| doublons de contenu | 9 900 | 99 000 |
+| pic mémoire tracemalloc | 71,5 Mo | 716,2 Mo |
+| export JSONL | 18,1 Mo | 181,6 Mo |
+
+Le taux de doublons de 99 % reflète la construction du corpus synthétique (blocs de `duplicate_every` pages au contenu identique). Ces chiffres servent de référence d'environnement ; aucun objectif de débit n'est fixé tant que des mesures Scrapy + PostgreSQL de bout en bout n'existent pas.
