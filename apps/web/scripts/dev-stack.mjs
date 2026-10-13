@@ -58,7 +58,10 @@ if (!/^POSTGRES_PASSWORD=.+$/m.test(envContent)) {
 console.log("[dev:stack] Démarrage de PostgreSQL…");
 docker(["up", "-d", "db"]);
 
-console.log("[dev:stack] Application des migrations (construction de l’image si nécessaire)…");
+console.log("[dev:stack] Construction de l’image applicative (couches en cache)…");
+docker(["build", "app"]);
+
+console.log("[dev:stack] Application des migrations…");
 docker(["run", "--rm", "app", "alembic", "upgrade", "head"]);
 
 console.log("[dev:stack] Base prête. Démarrage de l’interface sur http://localhost:5173\n");

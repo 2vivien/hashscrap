@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "dev:stack": "node scripts/dev-stack.mjs",
-    "stack:ready": "docker compose -f ../../compose.yaml up -d db && docker compose -f ../../compose.yaml run --rm app alembic upgrade head",
+    "stack:ready": "docker compose -f ../../compose.yaml up -d db && docker compose -f ../../compose.yaml build app && docker compose -f ../../compose.yaml run --rm app alembic upgrade head",
     "stack:down": "docker compose -f ../../compose.yaml down",
     "stack:logs": "docker compose -f ../../compose.yaml logs -f app",
     "build": "vite build",
