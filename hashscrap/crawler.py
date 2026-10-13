@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -27,16 +28,21 @@ class CrawlResult:
 
 
 class ResultCollector:
-    """Scrapy extension storing bounded run results in process memory."""
+    """Scrapy extension storing bounded run results in process memory.
 
-    def __init__(self) -> None:
+    When an `on_item` callback is supplied, scraped items are handed over and dropped
+    instead of being accumulated, so response bodies are not retained for the whole run.
+    """
+
+    def __init__(self, on_item: Callable[[dict[str, Any]], None] | None = None) -> None:
         self.items: list[dict[str, Any]] = []
         self.errors: list[str] = []
         self.responses = 0
+        self.on_item = on_item
 
     @classmethod
     def from_crawler(cls, crawler: Any) -> ResultCollector:
-        instance = cls()
+        instance = cls(crawler.settings.get("HASHSCRAP_ON_ITEM"))
         crawler.signals.connect(
             instance.item_scraped, signal=__import__("scrapy").signals.item_scraped
         )
@@ -53,7 +59,11 @@ class ResultCollector:
         return instance
 
     def item_scraped(self, item: Any, response: Any, spider: Any) -> None:
-        self.items.append(dict(item))
+        scraped = dict(item)
+        if self.on_item is not None:
+            self.on_item(scraped)
+            return
+        self.items.append(scraped)
 
     def response_received(self, response: Any, request: Any, spider: Any) -> None:
         self.responses += 1
@@ -65,7 +75,7 @@ class ResultCollector:
         self.errors.append("request_dropped")
 
 
-def _settings(source: Source) -> Settings:
+def _settings(source: Source, on_item: Callable[[dict[str, Any]], None] | None) -> Settings:
     limits = source.limits
     return Settings(
         {
@@ -78,6 +88,7 @@ def _settings(source: Source) -> Settings:
             "DOWNLOAD_TIMEOUT": limits.timeout_seconds,
             "DOWNLOAD_MAXSIZE": limits.max_response_bytes,
             "HASHSCRAP_MAX_REQUESTS": limits.max_pages,
+            "HASHSCRAP_ON_ITEM": on_item,
             "DOWNLOAD_FAIL_ON_DATALOSS": True,
             "DEPTH_LIMIT": limits.max_depth,
             "DEPTH_PRIORITY": 1,
@@ -86,6 +97,9 @@ def _settings(source: Source) -> Settings:
             "REDIRECT_ENABLED": True,
             "TELNETCONSOLE_ENABLED": False,
             "LOG_LEVEL": "WARNING",
+            # Scrapy's remote control extension writes a job file under the user state
+            # directory; the container filesystem is read-only, so it stays disabled.
+            "EXTENSIONS_BASE": {"scrapy.extensions.remote_control.RemoteControl": None},
             "EXTENSIONS": {"hashscrap.crawler.ResultCollector": 500},
             "DOWNLOADER_MIDDLEWARES": {
                 "hashscrap.middleware.RequestBudgetMiddleware": 40,
@@ -100,8 +114,14 @@ def collect(
     config: AppConfig,
     source_id: str,
     start_urls: list[str],
+    *,
+    on_item: Callable[[dict[str, Any]], None] | None = None,
 ) -> CrawlResult:
-    """Run a single bounded crawl and return intermediate in-memory results."""
+    """Run a single bounded crawl and return intermediate in-memory results.
+
+    When `on_item` is provided, scraped items are streamed to that callback instead of
+    being accumulated, which keeps memory bounded for long runs.
+    """
     source = SourceRegistry(config).get_enabled(source_id)
     if not start_urls:
         raise ValueError("at least one start URL is required")
@@ -109,9 +129,14 @@ def collect(
         if not _in_source_scope(url, source):
             raise ValueError("start URL is outside the configured source scope")
 
-    process = CrawlerProcess(settings=_settings(source))
+    process = CrawlerProcess(settings=_settings(source, on_item))
     crawler = process.create_crawler(BoundedSpider)
-    process.crawl(crawler, source=source.model_dump(), start_urls=start_urls)
+    process.crawl(
+        crawler,
+        source=source.model_dump(),
+        start_urls=start_urls,
+        include_body=on_item is not None,
+    )
     process.start(stop_after_crawl=True)
     collector = getattr(crawler, "result_collector", None)
     if collector is None:
