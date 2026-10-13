@@ -9,7 +9,7 @@ import {
   navGroups,
   sectionFromPathname,
   settingsNavItem,
-} from "../lib/sections";
+} from "./sections";
 
 describe("section metadata", () => {
   it("explains that source and collection APIs are not connected", () => {
