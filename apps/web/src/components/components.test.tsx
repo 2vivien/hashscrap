@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
 import { InlineAlert } from "./InlineAlert";
+import { LoadingSkeleton } from "./LoadingSkeleton";
+import { MetricCard } from "./MetricCard";
+import { StatusBadge } from "./StatusBadge";
 
 describe("InlineAlert", () => {
   it("announces the message as a status", () => {
@@ -63,5 +66,37 @@ describe("ErrorState", () => {
     expect(
       screen.getByRole("heading", { name: "Cette adresse ne correspond à aucune section" }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("MetricCard", () => {
+  it("renders a label, a value and an optional hint", () => {
+    render(<MetricCard label="Documents collectés" value="12" hint="toutes sources" />);
+    expect(screen.getByText("Documents collectés")).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText("toutes sources")).toBeInTheDocument();
+  });
+
+  it("applies the tone class so it can be checked visually", () => {
+    const { container } = render(<MetricCard label="À vérifier" value="3" tone="warning" />);
+    expect(container.querySelector(".metric-card--warning")).not.toBeNull();
+  });
+});
+
+describe("StatusBadge", () => {
+  it("always carries a textual label next to the colour", () => {
+    const { container } = render(<StatusBadge label="Terminée" tone="success" />);
+    expect(screen.getByText("Terminée")).toBeInTheDocument();
+    expect(container.querySelector(".status-badge--success")).not.toBeNull();
+    expect(container.querySelector(".status-badge-dot")?.getAttribute("aria-hidden")).toBe("true");
+  });
+});
+
+describe("LoadingSkeleton", () => {
+  it("announces the pending state and hides decorative rows", () => {
+    const { container } = render(<LoadingSkeleton label="Chargement des collectes" rows={2} />);
+    const status = screen.getByRole("status");
+    expect(status.textContent).toContain("Chargement des collectes");
+    expect(container.querySelectorAll(".skeleton-row")).toHaveLength(2);
   });
 });
