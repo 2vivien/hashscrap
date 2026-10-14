@@ -17,7 +17,7 @@ class URLSafetyMiddleware:
     must still be hardened against DNS rebinding; see docs/URL-SECURITY.md.
     """
 
-    def process_request(self, request: Request, spider: object) -> None:
+    def process_request(self, request: Request) -> None:
         decision = validate_url(request.url)
         if not decision.allowed:
             raise IgnoreRequest(f"URL policy rejected request: {decision.reason}")
@@ -35,7 +35,7 @@ class RequestBudgetMiddleware:
     def from_crawler(cls, crawler: Any) -> RequestBudgetMiddleware:
         return cls(crawler.settings.getint("HASHSCRAP_MAX_REQUESTS", 100))
 
-    def process_request(self, request: Request, spider: object) -> None:
+    def process_request(self, request: Request) -> None:
         if self.requests_started >= self.max_requests:
             raise IgnoreRequest("request budget exhausted")
         self.requests_started += 1

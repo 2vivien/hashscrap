@@ -12,7 +12,24 @@ hashscrap crawl --config examples/sources.json --source example-site --url https
 
 Repeat `--url` to supply multiple starting URLs. If omitted, the configured source base URL is used. The source must be enabled, and every start URL hostname must appear in that source's `allowed_hosts`.
 
-The command emits one JSON object to stdout. It includes intermediate page metadata only (URL, status, content type, byte count, title and link count); raw response bodies are not emitted. No database persistence is included in this issue.
+The command emits one JSON object to stdout. It includes intermediate page metadata only (URL, status, content type, byte count, title and link count); raw response bodies are not emitted. No database persistence is included in this command.
+
+## Persisted collection
+
+`hashscrap run` performs the same bounded collection and additionally extracts and persists evidence:
+
+```bash
+hashscrap run --config examples/sources.json --source example-site
+```
+
+It requires `HASHSCRAP_DATABASE_URL`. The command creates the `sources` row for the configured source, records one `crawl_jobs` row and one `crawl_runs` row, then writes each response as a `documents` row and its observations as `observations` rows, keeping `evidence_ref`, extractor name/version and UTC timestamps. It prints one JSON summary with `responses`, `documents_created`, `documents_updated`, `observations_created`, `failures` and `error_reasons`.
+
+Behavior:
+
+- Re-running the same collection is idempotent: an already stored `original_url` updates `last_seen_at` and the fingerprint instead of duplicating documents, and an observation already stored for that document is not written twice.
+- A document that fails extraction is rolled back to a savepoint and counted in `extraction_rejected`; it never aborts the run.
+- The job key is unique per invocation. Deduplicating queued work belongs to the durable worker, not to a single command run.
+- When an item consumer is attached, response bodies are streamed and dropped instead of accumulated, so memory stays bounded. `hashscrap crawl` keeps its previous in-memory behavior and never attaches bodies to items.
 
 ## Bounds and behavior
 

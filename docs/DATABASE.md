@@ -26,7 +26,19 @@ alembic downgrade -1
 alembic upgrade head
 ```
 
-La migration initiale crée les tables `sources`, `crawl_jobs`, `crawl_runs`, `documents` et `observations`. Les tables d'investigation et de corrélation sont différées jusqu'à leur usage effectif, afin d'éviter un schéma spéculatif.
+La migration initiale crée les tables `sources`, `crawl_jobs`, `crawl_runs`, `documents` et `observations`. La migration `0002_entity_correlation` ajoute `entities`, `entity_observations` et `entity_relationships`.
+
+## Écriture depuis le moteur
+
+La commande `hashscrap run` écrit les tables ci-dessus : une ligne `sources` par source configurée, une ligne `crawl_jobs` et une ligne `crawl_runs` par exécution, puis une ligne `documents` par URL collectée et une ligne `observations` par observation extraite.
+
+- Idempotence : un `original_url` déjà stocké met à jour `last_seen_at` et `content_sha256` au lieu de créer un second document ; une observation déjà présente pour ce document (même `field_name`, `evidence_ref` et `normalized_value`) n'est pas réécrite.
+- Provenance conservée : `evidence_ref`, `extractor`, `extractor_version`, `raw_value` et des horodatages UTC.
+- Un document refusé à l'extraction est annulé sur un savepoint ; la transaction globale n'est pas empoisonnée.
+- La transaction appartient à l'appelant : `hashscrap run` valide une seule fois à la fin.
+- Aucune écriture de secrets dans les logs : la commande n'affiche ni URL complète, ni corps de réponse, ni détail d'exception.
+
+Le module `hashscrap/pipeline.py` ne remplace ni `hashscrap.crawler`, ni `hashscrap.extraction`, ni `hashscrap.fingerprints`, ni `hashscrap.models` : il les compose.
 
 ## Principes de données
 

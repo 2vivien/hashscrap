@@ -34,6 +34,23 @@ def build_parser() -> argparse.ArgumentParser:
         default=[],
         help="explicit start URL; repeat for multiple URLs (defaults to source base URL)",
     )
+    run = subparsers.add_parser(
+        "run", help="collect a bounded source and persist documents and observations"
+    )
+    run.add_argument("--config", required=True, help="path to validated JSON configuration")
+    run.add_argument("--source", required=True, help="enabled source ID from the configuration")
+    run.add_argument(
+        "--url",
+        action="append",
+        dest="urls",
+        default=[],
+        help="explicit start URL; repeat for multiple URLs (defaults to source base URL)",
+    )
+    serve = subparsers.add_parser(
+        "serve", help="serve the read-only HTTP API (no write route exists)"
+    )
+    serve.add_argument("--host", default="127.0.0.1", help="bind address")
+    serve.add_argument("--port", type=int, default=8000, help="bind port")
     jobs = subparsers.add_parser("jobs", help="inspect persisted crawl jobs")
     job_subparsers = jobs.add_subparsers(dest="jobs_command", required=True)
     status = job_subparsers.add_parser("status", help="show one persisted job")
@@ -47,6 +64,51 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
+        return 0
+
+    if args.command == "run":
+        from sqlalchemy.orm import Session
+
+        from hashscrap.db import create_database_engine
+        from hashscrap.pipeline import collect_and_persist
+        from hashscrap.source_registry import SourceRegistry
+
+        engine = None
+        try:
+            config = load_config(args.config)
+            source = SourceRegistry(config).get_enabled(args.source)
+            urls = args.urls or [source.base_url]
+            engine = create_database_engine()
+            with Session(engine) as session:
+                with session.begin():
+                    summary = collect_and_persist(session, config, args.source, urls)
+        except (OSError, ValueError, LookupError, RuntimeError) as exc:
+            print(f"hashscrap: {exc}", file=sys.stderr)
+            return 2
+        except Exception:
+            # Do not dump request URLs, response bodies, or arbitrary exception details.
+            print("hashscrap: collection failed; inspect local logs for details", file=sys.stderr)
+            return 1
+        finally:
+            if engine is not None:
+                engine.dispose()
+
+        print(json.dumps(summary.to_dict(), ensure_ascii=False, sort_keys=True))
+        return 0 if summary.failures == 0 else 1
+
+    if args.command == "serve":
+        import uvicorn
+
+        from hashscrap.api import create_api
+        from hashscrap.db import create_database_engine
+
+        try:
+            # Fail fast with a clear message instead of starting a server that cannot read.
+            create_database_engine().dispose()
+        except RuntimeError as exc:
+            print(f"hashscrap: {exc}", file=sys.stderr)
+            return 2
+        uvicorn.run(create_api(), host=args.host, port=args.port, log_level="warning")
         return 0
 
     if args.command == "jobs":
