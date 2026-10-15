@@ -21,7 +21,7 @@ const serverEnv = (globalThis as {
   process?: { env?: Record<string, string | undefined> };
 }).process?.env;
 
-export const API_BASE_URL = serverEnv?.HASHSCRAP_API_URL ?? "http://127.0.0.1:8000";
+export const API_BASE_URL = serverEnv?.HASHSCRAP_API_URL ?? "http://127.0.0.1:8001";
 
 const REQUEST_TIMEOUT_MS = 5_000;
 

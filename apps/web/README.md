@@ -15,7 +15,7 @@ Frontend scaffold using TanStack Start, React, TypeScript and Tailwind CSS v4. T
     cd apps/web
     npm run dev:stack
 
-It requires Docker Desktop and a `.env` file at the repository root with `POSTGRES_PASSWORD` set. It starts in order: PostgreSQL container, `alembic upgrade head`, then the Vite dev server. It never runs `docker compose down -v`, so the database volume is preserved. Stop the database separately with:
+It requires Docker Desktop and a `.env` file at the repository root with `POSTGRES_PASSWORD` set. It starts in order: PostgreSQL container, application image build, `alembic upgrade head`, read-only API, then the Vite dev server. It never runs `docker compose down -v`, so the database volume is preserved. Stop the containers separately with:
 
     npm run stack:down
 
@@ -27,11 +27,22 @@ Related commands: `stack:ready` (database and migrations without the dev server)
     npm run typecheck   # vite build && tsc --noEmit
     npm run check       # both, in order
 
+## Data
+
+The overview and Sources views read the engine through the read-only API described in [docs/API.md](../../docs/API.md). Requests are issued from route server functions, so the API client never reaches the browser bundle and the database stays private.
+
+- The web server reads `HASHSCRAP_API_URL`, defaulting to `http://127.0.0.1:8001`. The published host port is configurable with `HASHSCRAP_API_PORT` in `.env` because 8000 is often taken by another local service.
+- When the API is unreachable, the view renders an explicit error panel. When it answers but nothing has been collected, it renders an explicit zero state. Sample data is never substituted for either.
+
+To see real numbers, persist a collection first:
+
+    docker compose run --rm app hashscrap run --config examples/sources.json --source example-site
+
 ## Current state
 
-This PR implements the application shell, accessible navigation, responsive design tokens, a truthful empty dashboard, and holding states for Sources and Collectes. There are no backend endpoints exposed by the current Python CLI, so server data is not mocked and write actions are disabled with explanations.
+The shell, accessible navigation, responsive design tokens and truthful empty states are in place, and the overview plus sources views read persisted evidence. Investigations, collections, entities, timeline, reports and parameters have no API contract yet, so they keep their explicit not-connected state, and write actions stay disabled with the reason attached.
 
-Do not enable source creation, launch/cancel/retry actions, metrics, or collection logs until API contracts and real error states are defined. The next integration step is a versioned FastAPI contract and generated/shared client types; do not infer routes from database tables.
+Do not enable source creation or crawl launch until their contracts define permissions, audit and error states. Do not infer routes from database tables.
 
 ## Design and accessibility
 
@@ -39,7 +50,8 @@ Do not enable source creation, launch/cancel/retry actions, metrics, or collecti
 - Single navigation registry in `src/lib/sections.ts`: sections, nav groups and breadcrumb labels; tests fail if a link points at an undeclared section.
 - Router `Link` navigation, skip link to the main content, accessible names kept when the sidebar collapses.
 - Visible keyboard focus and semantic landmarks.
-- Shared `EmptyState`, `InlineAlert` and `ErrorState` components; a route that does not exist renders an explicit error state instead of an empty one.
+- Shared `EmptyState`, `InlineAlert`, `ErrorState`, `MetricCard`, `StatusBadge` and `LoadingSkeleton` components; a route that does not exist renders an explicit error state instead of an empty one.
+- Status is always carried by a text label next to its colour, never by colour alone.
 - Responsive sidebar and content for desktop, tablet and mobile.
 - Reduced-motion preference respected.
 - Disabled actions explain their current limitation.

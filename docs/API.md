@@ -15,7 +15,14 @@ export HASHSCRAP_DATABASE_URL='postgresql+psycopg://hashscrap:CHANGE_ME@localhos
 hashscrap serve --host 127.0.0.1 --port 8000
 ```
 
-En local, le service `api` de `compose.yaml` fait la même chose et publie le port sur la boucleback hôte uniquement (`127.0.0.1:8000`). Sans `HASHSCRAP_DATABASE_URL`, la commande échoue immédiatement avec un message explicite au lieu de démarrer un serveur incapable de lire.
+En local, le service `api` de `compose.yaml` fait la même chose et publie le port sur la boucleback hôte uniquement. Le port hôte est configurable car `8000` est souvent occupé par un autre service :
+
+```sh
+# .env
+HASHSCRAP_API_PORT=8001
+```
+
+L'interface lit `HASHSCRAP_API_URL` et utilise par défaut `http://127.0.0.1:8001` ; si le port publié change, définir `HASHSCRAP_API_URL` côté serveur web en conséquence. Sans `HASHSCRAP_DATABASE_URL`, la commande échoue immédiatement avec un message explicite au lieu de démarrer un serveur incapable de lire.
 
 ## Routes
 

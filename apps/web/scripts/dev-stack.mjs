@@ -1,8 +1,9 @@
 /**
  * One-command local stack for the HashScrap web UI.
  *
- * Sequence: start the PostgreSQL service, apply migrations, then run the Vite dev server.
- * No dependency is added: this uses only Node built-ins.
+ * Sequence: start PostgreSQL, build the application image, apply migrations, start the
+ * read-only API, then run the Vite dev server. No dependency is added: this uses only
+ * Node built-ins.
  *
  * Safety: it never runs `docker compose down -v`; the database volume is preserved.
  */
@@ -29,7 +30,10 @@ function docker(args, options = {}) {
     ...options,
   });
   if (result.error) {
-    fail("docker n’est pas disponible dans le PATH.", "Installer Docker Desktop, ou lancer `npm run dev` pour l’interface seule.");
+    fail(
+      "docker n'est pas disponible dans le PATH.",
+      "Installer Docker Desktop, ou lancer `npm run dev` pour l'interface seule.",
+    );
   }
   if (result.status !== 0) {
     fail(`\`docker compose ${args.join(" ")}\` a échoué (code ${result.status}).`);
@@ -50,21 +54,27 @@ if (!existsSync(envFile)) {
 const envContent = readFileSync(envFile, "utf8");
 if (!/^POSTGRES_PASSWORD=.+$/m.test(envContent)) {
   fail(
-    "POSTGRES_PASSWORD n’est pas défini dans .env.",
+    "POSTGRES_PASSWORD n'est pas défini dans .env.",
     "Le service PostgreSQL refuse de démarrer sans ce secret ; ne pas le commiter.",
   );
 }
 
-console.log("[dev:stack] Démarrage de PostgreSQL…");
+console.log("[dev:stack] Demarrage de PostgreSQL...");
 docker(["up", "-d", "db"]);
 
-console.log("[dev:stack] Construction de l’image applicative (couches en cache)…");
+console.log("[dev:stack] Construction de l'image applicative (caches reutilises)...");
 docker(["build", "app"]);
 
-console.log("[dev:stack] Application des migrations…");
+console.log("[dev:stack] Application des migrations...");
 docker(["run", "--rm", "app", "alembic", "upgrade", "head"]);
 
-console.log("[dev:stack] Base prête. Démarrage de l’interface sur http://localhost:5173\n");
+console.log("[dev:stack] Demarrage de l'API en lecture seule...");
+docker(["up", "-d", "api"]);
+
+const apiPort = process.env.HASHSCRAP_API_PORT ?? "8001";
+console.log(
+  `[dev:stack] Base et API pretes. API sur http://127.0.0.1:${apiPort}, interface sur http://localhost:5173\n`,
+);
 
 const vite = spawn("npx", ["vite", "--host", "0.0.0.0"], { cwd: webRoot, stdio: "inherit", shell: true });
 
@@ -75,7 +85,9 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 vite.on("exit", (code) => {
-  console.log(`\n[dev:stack] Serveur de développement arrêté (code ${code ?? 0}). PostgreSQL reste démarré.`);
-  console.log("[dev:stack] Pour arrêter la base : npm run stack:down");
+  console.log(
+    `\n[dev:stack] Serveur de developpement arrete (code ${code ?? 0}). PostgreSQL et l'API restent demarres.`,
+  );
+  console.log("[dev:stack] Pour arreter la stack : npm run stack:down");
   process.exit(code ?? 0);
 });
