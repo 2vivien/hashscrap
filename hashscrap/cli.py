@@ -55,6 +55,36 @@ def build_parser() -> argparse.ArgumentParser:
     job_subparsers = jobs.add_subparsers(dest="jobs_command", required=True)
     status = job_subparsers.add_parser("status", help="show one persisted job")
     status.add_argument("job_id", help="UUID of the job")
+    report = subparsers.add_parser(
+        "report", help="render a sourced investigation report from persisted evidence"
+    )
+    report.add_argument(
+        "--format",
+        choices=("markdown", "json"),
+        default="markdown",
+        help="output format (default: markdown)",
+    )
+    report.add_argument("--investigation-id", default="local", help="investigation identifier")
+    report.add_argument("--title", default="HashScrap report", help="report title")
+    report.add_argument("--scope", default="local persisted evidence", help="declared scope")
+    report.add_argument(
+        "--source", default=None, help="limit the report to one persisted source key"
+    )
+    report.add_argument(
+        "--output", default=None, help="write the report to this file instead of stdout"
+    )
+    report.add_argument(
+        "--max-observations",
+        type=int,
+        default=1000,
+        help="maximum number of observations to include (>= 1)",
+    )
+    report.add_argument(
+        "--max-relationships",
+        type=int,
+        default=1000,
+        help="maximum number of relationships to include (>= 1)",
+    )
     return parser
 
 
@@ -149,6 +179,46 @@ def main(argv: Sequence[str] | None = None) -> int:
         except Exception:
             print("hashscrap: could not read job; inspect local logs for details", file=sys.stderr)
             return 1
+
+    if args.command == "report":
+        from pathlib import Path
+
+        from sqlalchemy.orm import Session
+
+        from hashscrap.db import create_database_engine
+        from hashscrap.report_builder import build_report
+        from hashscrap.reports import render_report_json, render_report_markdown
+
+        render = render_report_json if args.format == "json" else render_report_markdown
+        engine = None
+        try:
+            engine = create_database_engine()
+            with Session(engine) as session:
+                report = build_report(
+                    session,
+                    investigation_id=args.investigation_id,
+                    title=args.title,
+                    scope=args.scope,
+                    source_key=args.source,
+                    max_observations=args.max_observations,
+                    max_relationships=args.max_relationships,
+                )
+            text = render(report)
+            if args.output:
+                Path(args.output).write_text(text, encoding="utf-8")
+            else:
+                sys.stdout.write(text)
+        except (OSError, ValueError, LookupError, RuntimeError) as exc:
+            print(f"hashscrap: {exc}", file=sys.stderr)
+            return 2
+        except Exception:
+            # Never echo report content, a stack trace or a full URL on failure.
+            print("hashscrap: could not build report; inspect local logs", file=sys.stderr)
+            return 1
+        finally:
+            if engine is not None:
+                engine.dispose()
+        return 0
 
     if args.command != "crawl":
         parser.print_help()

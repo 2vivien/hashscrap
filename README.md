@@ -21,12 +21,13 @@ HashScrap is the bounded collection engine planned for HashCode Intelligence. Th
 
     hashscrap --help
     hashscrap --version
+    hashscrap report --format markdown
     pytest
     ruff check .
     ruff format --check .
     mypy
 
-The CLI currently exposes only help and version. It does not perform network requests or collect data yet.
+The CLI exposes bounded subcommands: `crawl` and `run` collect within validated limits, `serve` starts the read-only API, `jobs status` inspects a persisted job and `report` renders a sourced report from persisted evidence. Network access only happens inside a bounded, validated collection run.
 
 ## Project references
 
