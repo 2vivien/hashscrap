@@ -851,3 +851,137 @@ h1 {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Collectes view (issue #15): read-only runs table, filters and summary.
+   Values come from GET /api/v1/runs; nothing here implies write access. */
+.runs-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field__label {
+  color: var(--color-muted);
+  font-size: var(--text-meta);
+  letter-spacing: 0.9px;
+}
+
+.field select {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #334252;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: #d4dee7;
+  font-size: var(--text-dense);
+}
+
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-lime);
+  outline-offset: 2px;
+}
+
+.toolbar-hint {
+  max-width: 420px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-meta);
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.summary-card strong {
+  font-size: 20px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+
+/* Only the scrollable runs table is pinned wide; other tables keep wrapping. */
+.table-scroll .data-table {
+  min-width: 760px;
+}
+
+.table-scroll .data-table th,
+.table-scroll .data-table td {
+  white-space: nowrap;
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-surface-raised);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: #cdd8e2;
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+@media (max-width: 1100px) {
+  .summary-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .runs-toolbar {
+    align-items: stretch;
+  }
+
+  .field {
+    width: 100%;
+  }
+
+  .field select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

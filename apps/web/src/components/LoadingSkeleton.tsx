@@ -13,4 +13,4 @@ export function LoadingSkeleton({ label, rows = 3 }: LoadingSkeletonProps) {
       ))}
     </div>
   );
-}
+}

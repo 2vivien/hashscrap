@@ -7,5 +7,8 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    // Threads pool: no child process spawn, which is more reliable on Windows
+    // hosts where spawning a Node child can fail in constrained environments.
+    pool: "threads",
   },
 });

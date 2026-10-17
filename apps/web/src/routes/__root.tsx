@@ -85,8 +85,8 @@ function AppShell({ children }: { children: ReactNode }) {
           <div className="connection-state">
             <span className="status-dot status-dot--warning" aria-hidden="true" />
             <span>
-              Backend non connecté
-              <small>Mode interface uniquement</small>
+              Connexion partielle
+              <small>Collectes · lecture seule</small>
             </span>
           </div>
         </div>
@@ -110,7 +110,10 @@ function AppShell({ children }: { children: ReactNode }) {
         </main>
         <footer className="app-footer">
           <span>HashScrap · HashCode Intelligence</span>
-          <span>Interface seule · données serveur non connectées · vue d’accueil : {HOME_LABEL}</span>
+          <span>
+            Collectes lues via l’API (lecture seule) · autres vues non connectées · vue d’accueil :{" "}
+            {HOME_LABEL}
+          </span>
         </footer>
       </div>
     </div>

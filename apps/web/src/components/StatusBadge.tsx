@@ -14,4 +14,4 @@ export function StatusBadge({ label, tone }: StatusBadgeProps) {
       {label}
     </span>
   );
-}
+}

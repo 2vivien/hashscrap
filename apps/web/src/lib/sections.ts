@@ -40,7 +40,7 @@ const sections: Record<string, SectionConfig> = {
     breadcrumb: "Collectes",
     eyebrow: "EXÉCUTION / TÂCHES",
     description: "Suivez l’état des tâches, les compteurs et les erreurs de collecte.",
-    detail: "Aucune collecte n’est chargée : l’API des tâches et des journaux n’est pas encore exposée.",
+    detail: "Les collectes sont lues via GET /api/v1/runs ; le lancement, l’arrêt et les journaux détaillés ne sont pas encore exposés par l’API.",
   },
   entites: {
     title: "Entités & relations",

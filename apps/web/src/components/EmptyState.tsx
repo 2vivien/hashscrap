@@ -32,4 +32,4 @@ export function EmptyState({
       {actions ? <div className="empty-actions">{actions}</div> : null}
     </section>
   );
-}
+}
