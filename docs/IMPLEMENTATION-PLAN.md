@@ -24,6 +24,9 @@ Dépôt : https://github.com/digitaleflex/hashscrap
 | 12 | [#12 Rapports sourcés Markdown/JSON](https://github.com/digitaleflex/hashscrap/issues/12) | P1 | #9, #10, #11 |
 | 13 | [#13 Déploiement Docker Compose](https://github.com/digitaleflex/hashscrap/issues/13) | P1 | #1, #9 |
 | 14 | [#14 Benchmark 10k/100k](https://github.com/digitaleflex/hashscrap/issues/14) | P2 | #6, #7, #8, #9 |
+| 15 | [#35 Pipeline d'orchestration](https://github.com/digitaleflex/hashscrap/issues/35) ([spec locale](ISSUE-35-PIPELINE-ORCHESTRATION.md)) | P0 | #6, #7, #8, #9, #10 |
+
+> L'état réel des fonctions livrées et le manque de chaîne de bout en bout sont documentés dans [STATUS.md](STATUS.md).
 
 ## Jalons proposés
 
