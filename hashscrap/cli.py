@@ -34,10 +34,57 @@ def build_parser() -> argparse.ArgumentParser:
         default=[],
         help="explicit start URL; repeat for multiple URLs (defaults to source base URL)",
     )
+    run = subparsers.add_parser(
+        "run", help="collect a bounded source and persist documents and observations"
+    )
+    run.add_argument("--config", required=True, help="path to validated JSON configuration")
+    run.add_argument("--source", required=True, help="enabled source ID from the configuration")
+    run.add_argument(
+        "--url",
+        action="append",
+        dest="urls",
+        default=[],
+        help="explicit start URL; repeat for multiple URLs (defaults to source base URL)",
+    )
+    serve = subparsers.add_parser(
+        "serve", help="serve the read-only HTTP API (no write route exists)"
+    )
+    serve.add_argument("--host", default="127.0.0.1", help="bind address")
+    serve.add_argument("--port", type=int, default=8000, help="bind port")
     jobs = subparsers.add_parser("jobs", help="inspect persisted crawl jobs")
     job_subparsers = jobs.add_subparsers(dest="jobs_command", required=True)
     status = job_subparsers.add_parser("status", help="show one persisted job")
     status.add_argument("job_id", help="UUID of the job")
+    report = subparsers.add_parser(
+        "report", help="render a sourced investigation report from persisted evidence"
+    )
+    report.add_argument(
+        "--format",
+        choices=("markdown", "json"),
+        default="markdown",
+        help="output format (default: markdown)",
+    )
+    report.add_argument("--investigation-id", default="local", help="investigation identifier")
+    report.add_argument("--title", default="HashScrap report", help="report title")
+    report.add_argument("--scope", default="local persisted evidence", help="declared scope")
+    report.add_argument(
+        "--source", default=None, help="limit the report to one persisted source key"
+    )
+    report.add_argument(
+        "--output", default=None, help="write the report to this file instead of stdout"
+    )
+    report.add_argument(
+        "--max-observations",
+        type=int,
+        default=1000,
+        help="maximum number of observations to include (>= 1)",
+    )
+    report.add_argument(
+        "--max-relationships",
+        type=int,
+        default=1000,
+        help="maximum number of relationships to include (>= 1)",
+    )
     return parser
 
 
@@ -47,6 +94,51 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
+        return 0
+
+    if args.command == "run":
+        from sqlalchemy.orm import Session
+
+        from hashscrap.db import create_database_engine
+        from hashscrap.pipeline import collect_and_persist
+        from hashscrap.source_registry import SourceRegistry
+
+        engine = None
+        try:
+            config = load_config(args.config)
+            source = SourceRegistry(config).get_enabled(args.source)
+            urls = args.urls or [source.base_url]
+            engine = create_database_engine()
+            with Session(engine) as session:
+                with session.begin():
+                    summary = collect_and_persist(session, config, args.source, urls)
+        except (OSError, ValueError, LookupError, RuntimeError) as exc:
+            print(f"hashscrap: {exc}", file=sys.stderr)
+            return 2
+        except Exception:
+            # Do not dump request URLs, response bodies, or arbitrary exception details.
+            print("hashscrap: collection failed; inspect local logs for details", file=sys.stderr)
+            return 1
+        finally:
+            if engine is not None:
+                engine.dispose()
+
+        print(json.dumps(summary.to_dict(), ensure_ascii=False, sort_keys=True))
+        return 0 if summary.failures == 0 else 1
+
+    if args.command == "serve":
+        import uvicorn
+
+        from hashscrap.api import create_api
+        from hashscrap.db import create_database_engine
+
+        try:
+            # Fail fast with a clear message instead of starting a server that cannot read.
+            create_database_engine().dispose()
+        except RuntimeError as exc:
+            print(f"hashscrap: {exc}", file=sys.stderr)
+            return 2
+        uvicorn.run(create_api(), host=args.host, port=args.port, log_level="warning")
         return 0
 
     if args.command == "jobs":
@@ -87,6 +179,46 @@ def main(argv: Sequence[str] | None = None) -> int:
         except Exception:
             print("hashscrap: could not read job; inspect local logs for details", file=sys.stderr)
             return 1
+
+    if args.command == "report":
+        from pathlib import Path
+
+        from sqlalchemy.orm import Session
+
+        from hashscrap.db import create_database_engine
+        from hashscrap.report_builder import build_report
+        from hashscrap.reports import render_report_json, render_report_markdown
+
+        render = render_report_json if args.format == "json" else render_report_markdown
+        engine = None
+        try:
+            engine = create_database_engine()
+            with Session(engine) as session:
+                report = build_report(
+                    session,
+                    investigation_id=args.investigation_id,
+                    title=args.title,
+                    scope=args.scope,
+                    source_key=args.source,
+                    max_observations=args.max_observations,
+                    max_relationships=args.max_relationships,
+                )
+            text = render(report)
+            if args.output:
+                Path(args.output).write_text(text, encoding="utf-8")
+            else:
+                sys.stdout.write(text)
+        except (OSError, ValueError, LookupError, RuntimeError) as exc:
+            print(f"hashscrap: {exc}", file=sys.stderr)
+            return 2
+        except Exception:
+            # Never echo report content, a stack trace or a full URL on failure.
+            print("hashscrap: could not build report; inspect local logs", file=sys.stderr)
+            return 1
+        finally:
+            if engine is not None:
+                engine.dispose()
+        return 0
 
     if args.command != "crawl":
         parser.print_help()

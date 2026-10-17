@@ -30,9 +30,9 @@ def source_data(**limit_overrides: int) -> dict[str, object]:
 def test_request_budget_rejects_requests_after_limit() -> None:
     middleware = RequestBudgetMiddleware(max_requests=1)
     request = Request("http://127.0.0.1/")
-    middleware.process_request(request, object())  # first request stays within budget
+    middleware.process_request(request)  # first request stays within budget
     with pytest.raises(IgnoreRequest, match="budget exhausted"):
-        middleware.process_request(request, object())
+        middleware.process_request(request)
 
 
 def test_url_middleware_rejects_policy_denial(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -44,7 +44,24 @@ def test_url_middleware_rejects_policy_denial(monkeypatch: pytest.MonkeyPatch) -
         lambda _url: SimpleNamespace(allowed=False, reason="non_public_destination"),
     )
     with pytest.raises(IgnoreRequest, match="non_public_destination"):
-        URLSafetyMiddleware().process_request(Request("http://example.org/"), object())
+        URLSafetyMiddleware().process_request(Request("http://example.org/"))
+
+
+def test_remote_control_extension_is_disabled() -> None:
+    # The remote control extension writes under the user state directory, which does not
+    # exist in the read-only container filesystem.
+    from hashscrap.config import Source
+    from hashscrap.crawler import _settings
+
+    source = Source(
+        id="settings-only",
+        name="Settings only",
+        base_url="https://settings.example",
+        allowed_hosts=["settings.example"],
+    )
+    settings = _settings(source, None)
+    assert settings["EXTENSIONS_BASE"]["scrapy.extensions.remote_control.RemoteControl"] is None
+    assert settings["TELNETCONSOLE_ENABLED"] is False
 
 
 def test_spider_emits_typed_intermediate_fields_and_stops_at_page_limit() -> None:
