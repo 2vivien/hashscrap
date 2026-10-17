@@ -10,6 +10,9 @@ from collections.abc import Sequence
 from hashscrap import __version__
 from hashscrap.config import load_config
 
+# A job left "running" for longer than this is treated as interrupted by default.
+DEFAULT_STALE_AFTER_SECONDS = 3600
+
 
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
@@ -51,10 +54,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     serve.add_argument("--host", default="127.0.0.1", help="bind address")
     serve.add_argument("--port", type=int, default=8000, help="bind port")
-    jobs = subparsers.add_parser("jobs", help="inspect persisted crawl jobs")
+    jobs = subparsers.add_parser("jobs", help="inspect and recover persisted crawl jobs")
     job_subparsers = jobs.add_subparsers(dest="jobs_command", required=True)
     status = job_subparsers.add_parser("status", help="show one persisted job")
     status.add_argument("job_id", help="UUID of the job")
+    recover = job_subparsers.add_parser(
+        "recover", help="requeue jobs left running after an interrupted worker"
+    )
+    recover.add_argument(
+        "--stale-after",
+        type=int,
+        default=DEFAULT_STALE_AFTER_SECONDS,
+        help="requeue 'running' jobs idle for more than SECONDS (default: %(default)s)",
+    )
     report = subparsers.add_parser(
         "report", help="render a sourced investigation report from persisted evidence"
     )
@@ -142,11 +154,40 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == "jobs":
-        from uuid import UUID
-
         from sqlalchemy.orm import Session
 
         from hashscrap.db import create_database_engine
+
+        if args.jobs_command == "recover":
+            from datetime import UTC, datetime, timedelta
+
+            from hashscrap.jobs import recover_stale_jobs
+
+            if args.stale_after < 0:
+                print("hashscrap: --stale-after must not be negative", file=sys.stderr)
+                return 2
+            try:
+                engine = create_database_engine()
+                cutoff = datetime.now(UTC) - timedelta(seconds=args.stale_after)
+                with Session(engine) as session:
+                    recovered = recover_stale_jobs(session, older_than=cutoff)
+                    session.commit()
+                engine.dispose()
+                print(json.dumps({"recovered": recovered}, sort_keys=True))
+                return 0
+            except (ValueError, RuntimeError) as exc:
+                print(f"hashscrap: {exc}", file=sys.stderr)
+                return 2
+            except Exception:
+                # Do not leak job details or driver errors beyond a safe message.
+                print(
+                    "hashscrap: could not recover jobs; inspect local logs for details",
+                    file=sys.stderr,
+                )
+                return 1
+
+        from uuid import UUID
+
         from hashscrap.models import CrawlJob
 
         try:
