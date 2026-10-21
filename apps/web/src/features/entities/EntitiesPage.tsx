@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { DemoBanner } from "../../components/ui/DemoBanner";
 import { useEntities } from "./api/entity.queries";
 import type { Entity } from "./types/entity.types";
@@ -60,7 +61,11 @@ export function EntitiesPage() {
                 <tr key={entity.id}>
                   <td className="cell-mono">{entity.id}</td>
                   <td className="cell-muted">{entity.entity_type}</td>
-                  <td>{entity.raw_identifier}</td>
+                  <td>
+                    <Link to="/entities/$id" params={{ id: entity.id }}>
+                      {entity.raw_identifier}
+                    </Link>
+                  </td>
                   <td className="cell-mono">{entity.normalized_identifier}</td>
                   <td className="cell-muted">{entity.normalization_method}</td>
                   <td>

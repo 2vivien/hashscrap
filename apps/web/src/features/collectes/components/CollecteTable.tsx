@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { Collecte, CollecteStatus } from "../types/collecte.types";
 
 export interface CollecteTableProps {
@@ -35,7 +36,11 @@ export function CollecteTable({ collectes }: CollecteTableProps) {
         <tbody>
           {collectes.map((collecte) => (
             <tr key={collecte.id}>
-              <td className="cell-mono">{collecte.id}</td>
+              <td className="cell-mono">
+                <Link to="/collectes/$id" params={{ id: collecte.id }}>
+                  {collecte.id}
+                </Link>
+              </td>
               <td>{collecte.source}</td>
               <td className="cell-muted">{collecte.type}</td>
               <td>
