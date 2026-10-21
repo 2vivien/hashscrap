@@ -34,6 +34,10 @@ def build_parser() -> argparse.ArgumentParser:
         default=[],
         help="explicit start URL; repeat for multiple URLs (defaults to source base URL)",
     )
+    api = subparsers.add_parser("api", help="serve the read API over HTTP")
+    api.add_argument("--host", default="127.0.0.1", help="interface to bind")
+    api.add_argument("--port", type=int, default=8000, help="port to bind")
+    api.add_argument("--reload", action="store_true", help="reload on source changes")
     jobs = subparsers.add_parser("jobs", help="inspect persisted crawl jobs")
     job_subparsers = jobs.add_subparsers(dest="jobs_command", required=True)
     status = job_subparsers.add_parser("status", help="show one persisted job")
@@ -47,6 +51,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
+        return 0
+
+    if args.command == "api":
+        try:
+            import uvicorn
+        except ImportError:
+            print(
+                "hashscrap: uvicorn is required to serve the API (pip install '.[dev]')",
+                file=sys.stderr,
+            )
+            return 2
+        uvicorn.run(
+            "hashscrap.api.app:app",
+            host=args.host,
+            port=args.port,
+            reload=args.reload,
+            log_level="info",
+        )
         return 0
 
     if args.command == "jobs":
