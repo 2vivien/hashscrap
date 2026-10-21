@@ -5,11 +5,13 @@ import type { EntityDetailTab } from "./types/entity-detail.types";
 
 const TABS: EntityDetailTab[] = ["aperçu", "observations", "sources", "relations", "historique"];
 
-const DEMO_ENTITY_ID = "ent-2025-04-001";
+export interface EntityDetailPageProps {
+  id: string;
+}
 
-export function EntityDetailPage() {
+export function EntityDetailPage({ id }: EntityDetailPageProps) {
   const [activeTab, setActiveTab] = useState<EntityDetailTab>("aperçu");
-  const { data, isLoading } = useEntityDetail(DEMO_ENTITY_ID);
+  const { data, isLoading } = useEntityDetail(id);
 
   if (isLoading || !data) {
     return <p className="cell-muted">Chargement du détail de l’entité…</p>;

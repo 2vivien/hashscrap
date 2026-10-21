@@ -1,10 +1,12 @@
 import { DemoBanner } from "../../components/ui/DemoBanner";
 import { useCollecteDetail } from "./api/collecte-detail.queries";
 
-const DEMO_COLLECTE_ID = "c-2025-0423-001";
+export interface CollecteDetailPageProps {
+  id: string;
+}
 
-export function CollecteDetailPage() {
-  const { data: collecte, isLoading } = useCollecteDetail(DEMO_COLLECTE_ID);
+export function CollecteDetailPage({ id }: CollecteDetailPageProps) {
+  const { data: collecte, isLoading } = useCollecteDetail(id);
 
   if (isLoading || !collecte) {
     return <p className="cell-muted">Chargement du détail de la collecte…</p>;
