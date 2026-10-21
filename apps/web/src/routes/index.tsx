@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: DashboardPage,
@@ -27,8 +27,8 @@ function DashboardPage() {
         <h2>Les données apparaîtront ici</h2>
         <p>Commencez par connecter les endpoints de sources et de collectes. Les états vide, partiel, erreur et succès seront ensuite rendus à partir des réponses réelles.</p>
         <div className="empty-actions">
-          <a className="button button--secondary" href="/sources">Voir les sources</a>
-          <a className="button button--secondary" href="/collectes">Voir les collectes</a>
+          <Link className="button button--secondary" to="/sources">Voir les sources</Link>
+          <Link className="button button--secondary" to="/collectes">Voir les collectes</Link>
         </div>
       </section>
     </>

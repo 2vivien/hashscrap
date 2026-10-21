@@ -1,4 +1,11 @@
-import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  HeadContent,
+  Link,
+  Outlet,
+  Scripts,
+  useRouterState,
+} from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -18,7 +25,7 @@ const navGroups = [
   {
     label: "ANALYSE",
     items: [
-      { label: "Entités & relations", href: "/entites", icon: "◇" },
+      { label: "Entités & relations", href: "/entities", icon: "◇" },
       { label: "Chronologie", href: "/chronologie", icon: "≋" },
       { label: "Preuves", href: "/preuves", icon: "▤" },
       { label: "Rapports", href: "/rapports", icon: "▧" },
@@ -45,23 +52,27 @@ function AppShell({ children }: { children: ReactNode }) {
             {group.items.map((item) => {
               const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
               return (
-                <a
+                <Link
                   key={item.href}
-                  href={item.href}
+                  to={item.href}
                   className={active ? "nav-link nav-link--active" : "nav-link"}
                   aria-current={active ? "page" : undefined}
                 >
                   <span className="nav-icon" aria-hidden="true">{item.icon}</span>
                   {item.label}
-                </a>
+                </Link>
               );
             })}
           </nav>
         ))}
         <div className="sidebar-bottom">
-          <a className={pathname === "/parametres" ? "nav-link nav-link--active" : "nav-link"} href="/parametres" aria-current={pathname === "/parametres" ? "page" : undefined}>
+          <Link
+            className={pathname === "/parametres" ? "nav-link nav-link--active" : "nav-link"}
+            to="/parametres"
+            aria-current={pathname === "/parametres" ? "page" : undefined}
+          >
             <span className="nav-icon" aria-hidden="true">⚙</span>Paramètres
-          </a>
+          </Link>
           <div className="connection-state">
             <span className="status-dot status-dot--warning" aria-hidden="true" />
             <span>Backend non connecté<small>Mode interface uniquement</small></span>
