@@ -1,5 +1,8 @@
 import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 import type { ReactNode } from "react";
+import { createQueryClient } from "../lib/query-client";
 import "../styles.css";
 
 const navGroups = [
@@ -78,9 +81,12 @@ function AppShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
+  const [queryClient] = useState(createQueryClient);
   return (
     <RootDocument>
-      <AppShell><Outlet /></AppShell>
+      <QueryClientProvider client={queryClient}>
+        <AppShell><Outlet /></AppShell>
+      </QueryClientProvider>
     </RootDocument>
   );
 }
