@@ -50,8 +50,10 @@ Python ≥ 3.11, setuptools; install with `python -m pip install -e ".[dev]"`.
 
 ## UI work (`apps/web`)
 
-- React 19 + TanStack Start/Router + Tailwind 4 + **vite 7 + vitest 3** (vite 6 no longer satisfies `@tanstack/react-start` peer requirements). `package-lock.json` and the generated `src/routeTree.gen.ts` are committed — keep both. Commands in `apps/web`: `npm run dev`, `npm run build`, `npm run test`, `npm run typecheck` (typecheck = `vite build && tsc --noEmit`).
-- `prototypes/hashscrap-ui/index.html` is a static mock with **fake data** — never present its mock data as real or wire its examples to APIs as live data.
+- React 19 + TanStack Start/Router + Tailwind 4 + **vite 7 + vitest 3** (vite 6 no longer satisfies `@tanstack/react-start` peer requirements). `package-lock.json` and the generated `src/routeTree.gen.ts` are committed — keep both. Commands in `apps/web`: `npm run dev`, `npm run build`, `npm run test`, `npm run typecheck` (typecheck = `vite build && tsc --noEmit`). The CI runs both a Python job and a web job.
+- `prototypes/hashscrap-ui/index.html` is a static mock with **fake data** — never present its mock data as real or wire its examples to APIs as live data. `docs/Hashscrap-Dashboard-12-Pages.html` is the same kind of visual reference.
+- `docs/PROMPT-HASHSCRAP-FRONTEND.md` fixes the implementation conventions (feature folders, Zod contracts, mocks, query keys, size limits). `docs/DESIGN-SYSTEM.md` fixes the UI contract (tokens, shell, per-view content).
+- The engine exposes no HTTP API yet: every screen must show its demonstration data as such (`components/ui/DemoBanner.tsx`), and actions that would write must stay disabled with an explanatory title. Never simulate a success.
 - Build order: tokens, shell, shared state components first; one vertical slice per PR. Security, accessibility and provenance beat pixel-perfect imitation.
 
 ## Completion
