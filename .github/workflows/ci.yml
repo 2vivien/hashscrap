@@ -44,3 +44,30 @@ jobs:
 
       - name: Test
         run: pytest
+
+  web:
+    name: Web quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and type check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test
