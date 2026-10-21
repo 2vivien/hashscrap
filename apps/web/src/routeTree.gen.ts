@@ -11,6 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SectionRouteImport } from './routes/$section'
+import { Route as ChronologieRouteImport } from './routes/chronologie'
+import { Route as CollectesRouteImport } from './routes/collectes'
+import { Route as EntitiesRouteImport } from './routes/entities'
+import { Route as InvestigationsRouteImport } from './routes/investigations'
+import { Route as ParametresRouteImport } from './routes/parametres'
+import { Route as PreuvesRouteImport } from './routes/preuves'
+import { Route as RapportsRouteImport } from './routes/rapports'
+import { Route as SourceNewRouteImport } from './routes/source-new'
+import { Route as SourcesRouteImport } from './routes/sources'
+import { Route as CollectesIdRouteImport } from './routes/collectes_.$id'
+import { Route as EntitiesIdRouteImport } from './routes/entities_.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +33,170 @@ const SectionRoute = SectionRouteImport.update({
   path: '/$section',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChronologieRoute = ChronologieRouteImport.update({
+  id: '/chronologie',
+  path: '/chronologie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectesRoute = CollectesRouteImport.update({
+  id: '/collectes',
+  path: '/collectes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntitiesRoute = EntitiesRouteImport.update({
+  id: '/entities',
+  path: '/entities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvestigationsRoute = InvestigationsRouteImport.update({
+  id: '/investigations',
+  path: '/investigations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParametresRoute = ParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreuvesRoute = PreuvesRouteImport.update({
+  id: '/preuves',
+  path: '/preuves',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RapportsRoute = RapportsRouteImport.update({
+  id: '/rapports',
+  path: '/rapports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourceNewRoute = SourceNewRouteImport.update({
+  id: '/source-new',
+  path: '/source-new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourcesRoute = SourcesRouteImport.update({
+  id: '/sources',
+  path: '/sources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectesIdRoute = CollectesIdRouteImport.update({
+  id: '/collectes_/$id',
+  path: '/collectes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntitiesIdRoute = EntitiesIdRouteImport.update({
+  id: '/entities_/$id',
+  path: '/entities/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$section': typeof SectionRoute
+  '/chronologie': typeof ChronologieRoute
+  '/collectes': typeof CollectesRoute
+  '/entities': typeof EntitiesRoute
+  '/investigations': typeof InvestigationsRoute
+  '/parametres': typeof ParametresRoute
+  '/preuves': typeof PreuvesRoute
+  '/rapports': typeof RapportsRoute
+  '/source-new': typeof SourceNewRoute
+  '/sources': typeof SourcesRoute
+  '/collectes/$id': typeof CollectesIdRoute
+  '/entities/$id': typeof EntitiesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$section': typeof SectionRoute
+  '/chronologie': typeof ChronologieRoute
+  '/collectes': typeof CollectesRoute
+  '/entities': typeof EntitiesRoute
+  '/investigations': typeof InvestigationsRoute
+  '/parametres': typeof ParametresRoute
+  '/preuves': typeof PreuvesRoute
+  '/rapports': typeof RapportsRoute
+  '/source-new': typeof SourceNewRoute
+  '/sources': typeof SourcesRoute
+  '/collectes/$id': typeof CollectesIdRoute
+  '/entities/$id': typeof EntitiesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$section': typeof SectionRoute
+  '/chronologie': typeof ChronologieRoute
+  '/collectes': typeof CollectesRoute
+  '/entities': typeof EntitiesRoute
+  '/investigations': typeof InvestigationsRoute
+  '/parametres': typeof ParametresRoute
+  '/preuves': typeof PreuvesRoute
+  '/rapports': typeof RapportsRoute
+  '/source-new': typeof SourceNewRoute
+  '/sources': typeof SourcesRoute
+  '/collectes_/$id': typeof CollectesIdRoute
+  '/entities_/$id': typeof EntitiesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$section'
+  fullPaths:
+    | '/'
+    | '/$section'
+    | '/chronologie'
+    | '/collectes'
+    | '/entities'
+    | '/investigations'
+    | '/parametres'
+    | '/preuves'
+    | '/rapports'
+    | '/source-new'
+    | '/sources'
+    | '/collectes/$id'
+    | '/entities/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$section'
-  id: '__root__' | '/' | '/$section'
+  to:
+    | '/'
+    | '/$section'
+    | '/chronologie'
+    | '/collectes'
+    | '/entities'
+    | '/investigations'
+    | '/parametres'
+    | '/preuves'
+    | '/rapports'
+    | '/source-new'
+    | '/sources'
+    | '/collectes/$id'
+    | '/entities/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/$section'
+    | '/chronologie'
+    | '/collectes'
+    | '/entities'
+    | '/investigations'
+    | '/parametres'
+    | '/preuves'
+    | '/rapports'
+    | '/source-new'
+    | '/sources'
+    | '/collectes_/$id'
+    | '/entities_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SectionRoute: typeof SectionRoute
+  ChronologieRoute: typeof ChronologieRoute
+  CollectesRoute: typeof CollectesRoute
+  EntitiesRoute: typeof EntitiesRoute
+  InvestigationsRoute: typeof InvestigationsRoute
+  ParametresRoute: typeof ParametresRoute
+  PreuvesRoute: typeof PreuvesRoute
+  RapportsRoute: typeof RapportsRoute
+  SourceNewRoute: typeof SourceNewRoute
+  SourcesRoute: typeof SourcesRoute
+  CollectesIdRoute: typeof CollectesIdRoute
+  EntitiesIdRoute: typeof EntitiesIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +215,100 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SectionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chronologie': {
+      id: '/chronologie'
+      path: '/chronologie'
+      fullPath: '/chronologie'
+      preLoaderRoute: typeof ChronologieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collectes': {
+      id: '/collectes'
+      path: '/collectes'
+      fullPath: '/collectes'
+      preLoaderRoute: typeof CollectesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entities': {
+      id: '/entities'
+      path: '/entities'
+      fullPath: '/entities'
+      preLoaderRoute: typeof EntitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/investigations': {
+      id: '/investigations'
+      path: '/investigations'
+      fullPath: '/investigations'
+      preLoaderRoute: typeof InvestigationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parametres': {
+      id: '/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof ParametresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preuves': {
+      id: '/preuves'
+      path: '/preuves'
+      fullPath: '/preuves'
+      preLoaderRoute: typeof PreuvesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rapports': {
+      id: '/rapports'
+      path: '/rapports'
+      fullPath: '/rapports'
+      preLoaderRoute: typeof RapportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/source-new': {
+      id: '/source-new'
+      path: '/source-new'
+      fullPath: '/source-new'
+      preLoaderRoute: typeof SourceNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sources': {
+      id: '/sources'
+      path: '/sources'
+      fullPath: '/sources'
+      preLoaderRoute: typeof SourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collectes_/$id': {
+      id: '/collectes_/$id'
+      path: '/collectes/$id'
+      fullPath: '/collectes/$id'
+      preLoaderRoute: typeof CollectesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entities_/$id': {
+      id: '/entities_/$id'
+      path: '/entities/$id'
+      fullPath: '/entities/$id'
+      preLoaderRoute: typeof EntitiesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SectionRoute: SectionRoute,
+  ChronologieRoute: ChronologieRoute,
+  CollectesRoute: CollectesRoute,
+  EntitiesRoute: EntitiesRoute,
+  InvestigationsRoute: InvestigationsRoute,
+  ParametresRoute: ParametresRoute,
+  PreuvesRoute: PreuvesRoute,
+  RapportsRoute: RapportsRoute,
+  SourceNewRoute: SourceNewRoute,
+  SourcesRoute: SourcesRoute,
+  CollectesIdRoute: CollectesIdRoute,
+  EntitiesIdRoute: EntitiesIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
