@@ -15,6 +15,9 @@ dist/
 venv/
 env/
 
+# Local code index
+.codegraph/
+
 # Local configuration and secrets
 .env
 .env.*
