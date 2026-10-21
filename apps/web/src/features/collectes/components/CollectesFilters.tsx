@@ -1,74 +1,70 @@
-import type { CollecteFilters, CollecteStatus, CollecteType } from "../types/collecte.types";
+import { Button } from "../../../components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
+import {
+  COLLECTE_STATUS_LABEL,
+  COLLECTE_TYPE_LABEL,
+  type CollecteFilters,
+  type CollecteStatus,
+  type CollecteType,
+} from "../types/collectes.types";
 
 export interface CollectesFiltersProps {
   filters: CollecteFilters;
   onChange: (filters: CollecteFilters) => void;
 }
 
-const STATUTS: CollecteStatus[] = ["en_cours", "terminee", "echouee", "annulee"];
-const TYPES: CollecteType[] = ["Web", "Réseau", "API"];
+const STATUSES: CollecteStatus[] = ["en_cours", "terminee", "echouee", "annulee"];
+const TYPES: CollecteType[] = ["web", "api", "reseau"];
 
 export function CollectesFilters({ filters, onChange }: CollectesFiltersProps) {
   return (
-    <div className="toolbar">
-      <div className="field" style={{ minWidth: "220px", flex: "1 1 220px" }}>
-        <label className="field-label" htmlFor="collectes-search">
-          Recherche
-        </label>
-        <input
-          id="collectes-search"
-          className="input"
-          type="search"
-          value={filters.search ?? ""}
-          placeholder="Rechercher par source ou ID…"
-          onChange={(event) => onChange({ ...filters, search: event.currentTarget.value })}
-        />
-      </div>
-      <div className="field" style={{ minWidth: "160px" }}>
-        <label className="field-label" htmlFor="collectes-statut">
-          Statut
-        </label>
-        <select
-          id="collectes-statut"
-          className="select"
-          value={filters.statut ?? ""}
-          onChange={(event) => {
-            const value = event.currentTarget.value;
-            onChange({
-              ...filters,
-              statut: value === "" ? undefined : (value as CollecteStatus),
-            });
-          }}
-        >
-          <option value="">Tous</option>
-          {STATUTS.map((statut) => (
-            <option key={statut} value={statut}>
-              {statut}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="field" style={{ minWidth: "140px" }}>
-        <label className="field-label" htmlFor="collectes-type">
-          Type
-        </label>
-        <select
-          id="collectes-type"
-          className="select"
-          value={filters.type ?? ""}
-          onChange={(event) => {
-            const value = event.currentTarget.value;
-            onChange({ ...filters, type: value === "" ? undefined : (value as CollecteType) });
-          }}
-        >
-          <option value="">Tous</option>
+    <div className="mb-4 flex flex-wrap items-center gap-2.5">
+      <Select
+        value={filters.type}
+        onValueChange={(value) => onChange({ ...filters, type: value as CollecteType })}
+      >
+        <SelectTrigger className="w-[150px]">
+          <SelectValue placeholder="Type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Tous</SelectItem>
           {TYPES.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
+            <SelectItem key={type} value={type}>
+              {COLLECTE_TYPE_LABEL[type]}
+            </SelectItem>
           ))}
-        </select>
-      </div>
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={filters.status}
+        onValueChange={(value) => onChange({ ...filters, status: value as CollecteStatus })}
+      >
+        <SelectTrigger className="w-[150px]">
+          <SelectValue placeholder="Statut" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Tous</SelectItem>
+          {STATUSES.map((status) => (
+            <SelectItem key={status} value={status}>
+              {COLLECTE_STATUS_LABEL[status]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Button
+        variant="ghost"
+        onClick={() => onChange({ search: "", status: "all", type: "all" })}
+      >
+        Réinitialiser
+      </Button>
     </div>
   );
 }
