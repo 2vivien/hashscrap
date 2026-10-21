@@ -21,12 +21,34 @@ HashScrap is the bounded collection engine planned for HashCode Intelligence. Th
 
     hashscrap --help
     hashscrap --version
+    hashscrap crawl --config examples/sources.json --source example-site
+    hashscrap jobs status <job-uuid>
     pytest
     ruff check .
     ruff format --check .
     mypy
 
-The CLI currently exposes only help and version. It does not perform network requests or collect data yet.
+The CLI exposes a bounded crawl command and a job inspection command. The crawl runs
+Scrapy against explicitly configured sources, applies the URL and network destination
+policy, and prints intermediate page metadata as JSON. It does not persist results:
+persistence and reporting are driven from the Python package.
+
+## Web interface
+
+The `apps/web` directory holds the React interface. See
+[docs/PROMPT-HASHSCRAP-FRONTEND.md](docs/PROMPT-HASHSCRAP-FRONTEND.md) for the
+implementation conventions and [docs/DESIGN-SYSTEM.md](docs/DESIGN-SYSTEM.md) for the
+UI contract.
+
+    cd apps/web
+    npm install
+    npm run dev
+    npm run build
+    npm run test
+    npm run typecheck
+
+The interface is not connected to the engine yet: every screen states that the values
+it displays are demonstration data.
 
 ## Project references
 
