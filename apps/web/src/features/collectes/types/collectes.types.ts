@@ -1,4 +1,4 @@
-export type CollecteStatus = "en_cours" | "terminee" | "echouee" | "annulee";
+export type CollecteStatus = "en_cours" | "terminee" | "echouee" | "annulee" | "en_attente";
 
 export type CollecteType = "web" | "api" | "reseau";
 
@@ -22,8 +22,9 @@ export interface CollecteFilters {
 export const COLLECTE_STATUS_LABEL: Record<CollecteStatus, string> = {
   en_cours: "En cours",
   terminee: "Terminée",
-  echouee: "Echouée",
+  echouee: "Échouée",
   annulee: "Annulée",
+  en_attente: "En attente",
 };
 
 export const COLLECTE_TYPE_LABEL: Record<CollecteType, string> = {

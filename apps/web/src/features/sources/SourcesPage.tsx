@@ -9,16 +9,14 @@ import { SourcesFilters } from "./components/SourcesFilters";
 import { SourcesSidePanel } from "./components/SourcesSidePanel";
 import { SourcesTable } from "./components/SourcesTable";
 import { useSources } from "./hooks/useSources";
-import type { Source, SourceFilters } from "./types/sources.types";
+import type { SourceFilters } from "./types/sources.types";
 
 const EMPTY_FILTERS: SourceFilters = { search: "", type: "all", statut: "all" };
 
 export function SourcesPage() {
   const { data, isPending, isError, refetch } = useSources();
   const [filters, setFilters] = useState<SourceFilters>(EMPTY_FILTERS);
-  const [extra] = useState<Source[]>([]);
-
-  const all = useMemo(() => [...extra, ...(data?.items ?? [])], [extra, data]);
+  const all = data?.items ?? [];
 
   const sources = useMemo(() => {
     const search = filters.search.trim().toLowerCase();

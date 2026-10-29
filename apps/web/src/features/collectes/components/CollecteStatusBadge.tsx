@@ -6,6 +6,7 @@ const TONE: Record<CollecteStatus, "blue" | "green" | "red" | "neutral"> = {
   terminee: "green",
   echouee: "red",
   annulee: "neutral",
+  en_attente: "neutral",
 };
 
 export interface CollecteStatusBadgeProps {

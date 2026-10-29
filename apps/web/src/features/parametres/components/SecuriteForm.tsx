@@ -1,37 +1,26 @@
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
-import { type Parametres } from "../types/parametres.types";
+import { Switch } from "../../../components/ui/switch";
+import { Label } from "../../../components/ui/label";
+import type { ParametresPayload } from "../validators/parametres.schema";
 
-interface SecuriteFormProps {
-  initialData: Parametres["securite"];
-}
-
-export function SecuriteForm({ initialData }: SecuriteFormProps) {
-  const warning = initialData.reset_warning;
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Sécurité</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4 rounded-[10px] border border-red/30 bg-red-dim p-4">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="size-4 text-red" />
-            <p className="text-[12px] text-ink-secondary">{warning}
-              La réinitialisation supprime toutes les collectes et preuves. Action irréversible.
-            </p>
-          </div>
-        </div>
-
-        <Button
-          variant="danger"
-          disabled
-          title="Disponible quand l'API de réinitialisation sera exposée"
-        >
-          Réinitialiser le moteur
-        </Button>
-      </CardContent>
-    </Card>
-  );
+interface Props { initialData: ParametresPayload["securite"]; onSave: (value: ParametresPayload["securite"]) => Promise<void>; }
+export function SecuriteForm({ initialData, onSave }: Props) {
+  const [value, setValue] = useState(initialData);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => setValue(initialData), [initialData]);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setSaving(true);
+    try { await onSave(value); } finally { setSaving(false); }
+  }
+  return <Card><CardHeader><CardTitle>Sécurité</CardTitle></CardHeader><CardContent>
+    <form onSubmit={submit} className="space-y-4">
+      <div className="rounded-[10px] border border-red/30 bg-red-dim p-4"><div className="flex items-start gap-2"><AlertTriangle className="size-4 text-red" /><p className="text-[12px] text-ink-secondary">Ce réglage configure l’avertissement de sécurité. L’API actuelle n’expose pas de route de réinitialisation du moteur.</p></div></div>
+      <div className="flex items-center gap-3"><Switch id="reset-warning" checked={value.reset_warning} onCheckedChange={(checked) => setValue({ reset_warning: checked })} /><Label htmlFor="reset-warning">Afficher l’avertissement avant une réinitialisation</Label></div>
+      <Button type="submit" variant="primary" disabled={saving}>{saving ? "Enregistrement…" : "Enregistrer"}</Button>
+    </form>
+  </CardContent></Card>;
 }
