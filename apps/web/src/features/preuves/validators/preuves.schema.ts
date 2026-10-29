@@ -1,22 +1,9 @@
 import { z } from "zod";
-
 export const PreuveStatusSchema = z.enum(["validee", "en_attente", "erreur"]);
-
 export const PreuveSchema = z.object({
-  id: z.string().min(1),
-  url: z.string().url(),
-  source: z.string().min(1),
-  collectee_le: z.string().min(1),
-  sha256: z.string(),
-  statut: PreuveStatusSchema,
-  taille: z.number().int().min(0),
-  apercu_url: z.string().min(1),
-});
-
-export const PreuvesResponseSchema = z.object({
-  items: z.array(PreuveSchema),
-  total: z.number().int().min(0),
-});
-
+  id: z.string(), url: z.string(), source: z.string(), collectee_le: z.string().datetime({ offset: true }),
+  sha256: z.string(), statut: PreuveStatusSchema, taille: z.number().int().min(0), apercu_url: z.string(),
+}).strict();
+export const PreuvesResponseSchema = z.object({ items: z.array(PreuveSchema), total: z.number().int().min(0) }).strict();
 export type PreuvePayload = z.infer<typeof PreuveSchema>;
 export type PreuvesResponse = z.infer<typeof PreuvesResponseSchema>;

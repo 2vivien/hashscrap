@@ -1,47 +1,16 @@
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import type { Investigation } from "../types/investigations.types";
 
-const data = [
-  { name: "Web", value: 65 },
-  { name: "API", value: 25 },
-  { name: "Réseau", value: 10 },
-];
+const COLORS = ["#84cc16", "#3b82f6", "#f59e0b", "#64748b"];
+const LABELS: Record<Investigation["statut"], string> = { en_cours: "En cours", terminee: "Terminées", en_attente: "En attente", annulee: "Annulées" };
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b"];
-
-interface InvestigationsDistributionProps {
-  // Add any props if needed
-}
-
-export function InvestigationsDistribution({}: InvestigationsDistributionProps) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Répartition</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[200px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={40}
-                outerRadius={60}
-                fill="#8884d8"
-                dataKey="value"
-                label
-              >
-                {data.map((_entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  );
+export function InvestigationsDistribution({ investigations }: { investigations: Investigation[] }) {
+  const data = (Object.keys(LABELS) as Investigation["statut"][]).map((status) => ({
+    name: LABELS[status],
+    value: investigations.filter((item) => item.statut === status).length,
+  })).filter((item) => item.value > 0);
+  return <Card><CardHeader><CardTitle>Répartition par statut</CardTitle></CardHeader><CardContent>
+    {data.length === 0 ? <p className="py-8 text-center text-sm text-ink-muted">Aucune investigation retournée par l’API.</p> : <div className="h-[200px] w-full"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={data} cx="50%" cy="50%" innerRadius={40} outerRadius={60} dataKey="value" label>{data.map((entry, index) => <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip /><Legend /></PieChart></ResponsiveContainer></div>}
+  </CardContent></Card>;
 }

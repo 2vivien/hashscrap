@@ -1,22 +1,19 @@
 import { apiRequest } from "../../../lib/api-client";
-import { isMockSource } from "../../../lib/data-source";
-import { MOCK_PARAMETRES } from "../mocks/parametres.mock";
-import {
-  ParametresSchema,
-  type ParametresPayload,
-} from "../validators/parametres.schema";
+import { ParametresSchema, ParametresUpdateSchema, type ParametresPayload, type ParametresUpdatePayload } from "../validators/parametres.schema";
 
 export const parametresKeys = {
   all: ["parametres"] as const,
   detail: () => [...parametresKeys.all, "detail"] as const,
 };
-
 export type ParametresKeys = typeof parametresKeys;
 
-/** Read the engine settings exposed by the engine. */
+/** GET /api/v1/parametres */
 export async function fetchParametres(signal?: AbortSignal): Promise<ParametresPayload> {
-  if (isMockSource()) {
-    return MOCK_PARAMETRES;
-  }
   return apiRequest("/parametres", ParametresSchema, { signal });
+}
+
+/** PUT /api/v1/parametres persists only the provided settings sections. */
+export async function updateParametres(payload: ParametresUpdatePayload): Promise<ParametresPayload> {
+  const parsed = ParametresUpdateSchema.parse(payload);
+  return apiRequest("/parametres", ParametresSchema, { method: "PUT", body: parsed });
 }

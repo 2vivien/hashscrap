@@ -1,4 +1,4 @@
-export type InvestigationStatus = "en_cours" | "terminee" | "en_attente";
+export type InvestigationStatus = "en_cours" | "terminee" | "en_attente" | "annulee";
 
 export interface Investigation {
   id: string;
@@ -18,4 +18,5 @@ export const INVESTIGATION_STATUS_LABEL: Record<InvestigationStatus, string> = {
   en_cours: "En cours",
   terminee: "Terminée",
   en_attente: "En attente",
+  annulee: "Annulée",
 };

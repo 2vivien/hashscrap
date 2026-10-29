@@ -1,23 +1,13 @@
 import { apiRequest } from "../../../lib/api-client";
-import { isMockSource } from "../../../lib/data-source";
-import { MOCK_ENTITY_DETAIL } from "../mocks/entity-detail.mock";
-import {
-  EntityDetailResponseSchema,
-  type EntityDetailResponse,
-} from "../validators/entity-detail.schema";
+import { EntityDetailResponseSchema, type EntityDetailResponse } from "../validators/entity-detail.schema";
 
-/** Query keys for the entity-detail feature. */
 export const entityDetailKeys = {
   all: ["entity-detail"] as const,
   detail: (id: string) => [...entityDetailKeys.all, "detail", id] as const,
 };
-
 export type EntityDetailKeys = typeof entityDetailKeys;
 
-/** Read the entity detail exposed by the engine. */
+/** GET /api/v1/entites/{entity_id} */
 export async function fetchEntityDetail(id: string, signal?: AbortSignal): Promise<EntityDetailResponse> {
-  if (isMockSource()) {
-    return MOCK_ENTITY_DETAIL;
-  }
-  return apiRequest(`/entites/${id}`, EntityDetailResponseSchema, { signal });
+  return apiRequest(`/entites/${encodeURIComponent(id)}`, EntityDetailResponseSchema, { signal });
 }

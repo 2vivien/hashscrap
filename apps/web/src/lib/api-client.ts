@@ -22,32 +22,52 @@ export class ApiError extends Error {
 }
 
 export interface RequestOptions {
-  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   signal?: AbortSignal;
 }
 
+async function readErrorDetails(response: Response): Promise<unknown> {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    return response.json().catch(() => undefined);
+  }
+  return response.text().catch(() => undefined);
+}
+
 /**
  * Call the versioned engine API and validate the payload with the given Zod contract.
- *
- * The client never trusts the network: an invalid payload is a failure, not a
- * partially usable response.
+ * HTTP errors preserve FastAPI's JSON detail (including validation errors) for the UI.
  */
 export async function apiRequest<T>(
   path: string,
   schema: ZodType<T>,
   options: RequestOptions = {},
 ): Promise<T> {
+  const hasBody = options.body !== undefined;
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: options.method ?? "GET",
     signal: options.signal,
-    headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}) },
-    ...(options.body ? { body: JSON.stringify(options.body) } : {}),
+    headers: {
+      Accept: "application/json",
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
+    },
+    ...(hasBody ? { body: JSON.stringify(options.body) } : {}),
   });
 
   if (!response.ok) {
-    const details = await response.text().catch(() => undefined);
-    throw new ApiError(`API error ${response.status} on ${path}`, response.status, details);
+    const details = await readErrorDetails(response);
+    const detailMessage =
+      details && typeof details === "object" && "detail" in details
+        ? JSON.stringify((details as { detail: unknown }).detail)
+        : typeof details === "string" && details
+          ? details
+          : response.statusText;
+    throw new ApiError(`API error ${response.status} on ${path}: ${detailMessage}`, response.status, details);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   const payload: unknown = await response.json();
