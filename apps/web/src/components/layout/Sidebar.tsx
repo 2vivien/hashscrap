@@ -51,7 +51,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </ul>
       </nav>
 
-      <div className="mt-auto border-t border-line px-4 py-3">
+      <div className="border-t border-line px-4 py-3">
         <div className="flex items-center gap-2.5">
           <span className="grid size-8 place-items-center rounded-full bg-card-2 text-[12px] font-semibold text-ink">
             JD
