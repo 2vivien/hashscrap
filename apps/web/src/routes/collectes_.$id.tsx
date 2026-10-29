@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CollecteDetailPage } from "../features/collecte-detail/CollecteDetailPage";
+import { CollecteDetailPage } from "../features/collecte-detail";
 
 export const Route = createFileRoute("/collectes_/$id")({
   component: CollecteDetailRoute,

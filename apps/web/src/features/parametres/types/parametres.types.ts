@@ -1,31 +1,41 @@
-export type ParametresSection = "collecteur" | "reseau" | "conservation" | "securite" | "audit";
-
-export interface CollecteurLimits {
-  pages_max: number;
-  profondeur: number;
-  timeout: number;
-  concurrence: number;
+export interface Parametres {
+  collecteur: {
+    requests_per_second: number;
+    depth: number;
+    max_pages: number;
+    timeout: number;
+  };
+  reseau: {
+    proxy: string;
+    user_agent_rotation: boolean;
+    robots_txt: boolean;
+  };
+  conservation: {
+    preuves: "90" | "365" | "illimite";
+    auto_suppression_logs: {
+      active: boolean;
+      jours: number;
+    };
+  };
+  securite: {
+    reset_warning: boolean;
+  };
+  audit: {
+    logs: Array<{
+      at: string;
+      level: "INFO" | "DEBUG" | "WARN" | "ERROR";
+      message: string;
+    }>;
+    derniere_maj: string;
+    version: string;
+    licence: string;
+  };
 }
 
-export interface ReseauLimits {
-  perimeter: "internet" | "restreint";
-  restrictions: string[];
-}
-
-export interface ConservationLimits {
-  retention_obs: number; // en jours
-  retention_preuves: number;
-  retention_rapports: number;
-}
-
-export interface SecuriteLimits {
-  audit_log: boolean;
-  requires_auth: boolean;
-}
-
-export interface ParametresFormValues {
-  collecteur: CollecteurLimits;
-  reseau: ReseauLimits;
-  conservation: ConservationLimits;
-  securite: SecuriteLimits;
-}
+export const CONSERVATION_LABELS = {
+  preuves: {
+    "90": "90 jours",
+    "365": "1 an",
+    "illimite": "Illimité",
+  },
+};

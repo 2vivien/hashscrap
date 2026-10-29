@@ -1,18 +1,25 @@
-export type ChronologieFilter = "01/04/2025-12/05/2025" | "tous_types" | "toutes_sources";
+export type EventType = "collecte" | "observation" | "evenement" | "preuve" | "relation";
 
-export type ChronologieGroupement = "jour" | "semaine" | "mois";
-
-export interface EvenementTimeline {
+export interface ChronologieEvent {
+  id: string;
+  at: string;
   date: string;
-  type: "collecte" | "observation" | "événement" | "preuve" | "relation";
-  icone: string;
+  heure: string;
+  type: EventType;
   titre: string;
   description: string;
+  source: string;
 }
 
-export interface ChronologieFilterOptions {
-  date_debut: string;
-  date_fin: string;
-  type: "tous_types" | "collecte" | "observation" | "événement" | "preuve" | "relation";
-  source: "toutes_sources" | string;
+export interface ChronologieFilters {
+  startDate: string;
+  endDate: string;
 }
+
+export const EVENT_TYPE_LABEL: Record<EventType, string> = {
+  collecte: "Collecte",
+  observation: "Observation",
+  evenement: "Événement",
+  preuve: "Preuve",
+  relation: "Relation",
+};

@@ -355,17 +355,13 @@ SETTINGS: dict[str, dict[str, object]] = {
     "reseau": {
         "proxy": "socks5://10.0.0.5:1080",
         "user_agent_rotation": True,
-        "robots_txt": "strict",
+        "robots_txt": True,
     },
     "conservation": {
-        "preuves": "90 jours",
-        "auto_suppression_logs": "Activé • 30 jours",
+        "preuves": "90",
+        "auto_suppression_logs": {"active": True, "jours": 30},
     },
-    "securite": {
-        "reset_warning": (
-            "La réinitialisation supprime toutes les collectes et preuves. Action irréversible."
-        )
-    },
+    "securite": {"reset_warning": True},
 }
 
 AUDIT_EVENTS: list[tuple[str, str, str, str]] = [

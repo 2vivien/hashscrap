@@ -68,6 +68,8 @@ class CrawlJob(Base):
         Uuid(as_uuid=True), ForeignKey("sources.id", ondelete="SET NULL")
     )
     input_url: Mapped[str] = mapped_column(String(4096), nullable=False)
+    reference: Mapped[str | None] = mapped_column(String(32), unique=True)
+    target_pages: Mapped[int | None] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="queued")
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     max_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=3)
@@ -143,6 +145,7 @@ class Document(Base):
     original_url: Mapped[str] = mapped_column(String(4096), nullable=False)
     canonical_url: Mapped[str | None] = mapped_column(String(4096))
     content_sha256: Mapped[str | None] = mapped_column(String(64))
+    content_bytes: Mapped[int | None] = mapped_column(Integer)
     media_type: Mapped[str | None] = mapped_column(String(255))
     status_code: Mapped[int | None] = mapped_column(Integer)
     first_seen_at: Mapped[datetime] = mapped_column(
@@ -286,3 +289,110 @@ class EntityRelationship(Base):
         back_populates="incoming_relationships", foreign_keys=[target_entity_id]
     )
     evidence_observation: Mapped[Observation] = relationship()
+
+
+class Investigation(Base):
+    __tablename__ = "investigations"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('en_cours', 'terminee', 'en_attente', 'annulee')",
+            name="ck_investigations_status",
+        ),
+        Index("ix_investigations_status_updated", "status", "updated_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    name: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="en_cours")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+    items: Mapped[list[InvestigationItem]] = relationship(
+        back_populates="investigation", cascade="all, delete-orphan"
+    )
+    reports: Mapped[list[Report]] = relationship(back_populates="investigation")
+
+
+class InvestigationItem(Base):
+    __tablename__ = "investigation_items"
+    __table_args__ = (
+        UniqueConstraint(
+            "investigation_id",
+            "job_id",
+            "document_id",
+            "entity_id",
+            name="uq_investigation_items_member",
+        ),
+        Index("ix_investigation_items_investigation", "investigation_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    investigation_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("investigations.id", ondelete="CASCADE"), nullable=False
+    )
+    job_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("crawl_jobs.id", ondelete="CASCADE")
+    )
+    document_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("documents.id", ondelete="CASCADE")
+    )
+    entity_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("entities.id", ondelete="CASCADE")
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    investigation: Mapped[Investigation] = relationship(back_populates="items")
+
+
+class Report(Base):
+    __tablename__ = "reports"
+    __table_args__ = (
+        CheckConstraint("status IN ('en_attente', 'validee', 'rejetee')", name="ck_reports_status"),
+        CheckConstraint("format IN ('pdf', 'markdown', 'json')", name="ck_reports_format"),
+        Index("ix_reports_investigation", "investigation_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    investigation_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("investigations.id", ondelete="SET NULL")
+    )
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="en_attente")
+    format: Mapped[str] = mapped_column(String(16), nullable=False, default="markdown")
+    content: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    investigation: Mapped[Investigation | None] = relationship(back_populates="reports")
+
+
+class EngineSetting(Base):
+    __tablename__ = "engine_settings"
+
+    key: Mapped[str] = mapped_column(String(80), primary_key=True)
+    value: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+
+class AuditEvent(Base):
+    __tablename__ = "audit_events"
+    __table_args__ = (Index("ix_audit_events_occurred", "occurred_at"),)
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    actor: Mapped[str] = mapped_column(String(120), nullable=False, default="local")
+    action: Mapped[str] = mapped_column(String(120), nullable=False)
+    resource: Mapped[str] = mapped_column(String(200), nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    details: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, nullable=False, default=dict)

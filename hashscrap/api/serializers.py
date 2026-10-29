@@ -11,6 +11,7 @@ from typing import Any
 
 from hashscrap.api.schemas import (
     ActivityOut,
+    AutoSuppressionSettingsOut,
     CollecteDetailOut,
     CollecteErrorOut,
     CollecteEventOut,
@@ -270,17 +271,9 @@ def evidence_out(document: Document, source_name: str) -> EvidenceOut:
         collectee_le=_utc(document.first_seen_at) or datetime.now(UTC),
         sha256=sha256,
         statut=statut,  # type: ignore[arg-type]
-        taille=_human_size(size),
+        taille=size,
         apercu_url=document.canonical_url or document.original_url,
     )
-
-
-def _human_size(size: int) -> str:
-    if size <= 0:
-        return "0 Ko"
-    if size < 1024:
-        return f"{size} o"
-    return f"{size / 1024:.1f}".replace(".", ",") + " Ko"
 
 
 def report_out(report: Report, investigation_name: str) -> ReportOut:
@@ -295,27 +288,6 @@ def report_out(report: Report, investigation_name: str) -> ReportOut:
     )
 
 
-MONTHS_FR = (
-    "janvier",
-    "février",
-    "mars",
-    "avril",
-    "mai",
-    "juin",
-    "juillet",
-    "août",
-    "septembre",
-    "octobre",
-    "novembre",
-    "décembre",
-)
-
-
-def format_date_fr(moment: datetime) -> str:
-    """Format a date in French without depending on the system locale."""
-    return f"{moment.day} {MONTHS_FR[moment.month - 1]} {moment.year}"
-
-
 def timeline_event_out(
     event_id: str,
     moment: datetime,
@@ -327,7 +299,8 @@ def timeline_event_out(
     local = _utc(moment) or datetime.now(UTC)
     return TimelineEventOut(
         id=event_id,
-        date=format_date_fr(local),
+        at=local,
+        date=local.date().isoformat(),
         heure=local.strftime("%H:%M"),
         type=event_type,  # type: ignore[arg-type]
         titre=titre,
@@ -359,17 +332,11 @@ def stat_out(value: int, delta: str = "") -> StatOut:
 DEFAULT_COLLECTOR_SETTINGS = CollectorSettingsOut(
     requests_per_second=1.0, depth=2, max_pages=100, timeout=10
 )
-DEFAULT_NETWORK_SETTINGS = NetworkSettingsOut(
-    proxy="", user_agent_rotation=False, robots_txt="strict"
-)
+DEFAULT_NETWORK_SETTINGS = NetworkSettingsOut(proxy="", user_agent_rotation=False, robots_txt=True)
 DEFAULT_RETENTION_SETTINGS = RetentionSettingsOut(
-    preuves="90 jours", auto_suppression_logs="Activé • 30 jours"
+    preuves="90", auto_suppression_logs=AutoSuppressionSettingsOut(active=True, jours=30)
 )
-DEFAULT_SECURITY_SETTINGS = SecuritySettingsOut(
-    reset_warning=(
-        "La réinitialisation supprime toutes les collectes et preuves. Action irréversible."
-    )
-)
+DEFAULT_SECURITY_SETTINGS = SecuritySettingsOut(reset_warning=True)
 
 
 def settings_from_payload(payload: dict[str, Any] | None) -> dict[str, Any]:

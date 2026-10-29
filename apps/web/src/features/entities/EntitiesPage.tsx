@@ -1,85 +1,67 @@
-import { Link } from "@tanstack/react-router";
-import { DemoBanner } from "../../components/ui/DemoBanner";
-import { useEntities } from "./api/entity.queries";
-import type { Entity } from "./types/entity.types";
+import { useMemo, useState } from "react";
+import { Download, Merge } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
+import { PageHeader } from "../../components/layout/PageHeader";
+import { EntitiesFilters } from "./components/EntitiesFilters";
+import { EntitiesTable } from "./components/EntitiesTable";
+import { EntityDetailPanel } from "./components/EntityDetailPanel";
+import { useEntities } from "./hooks/useEntities";
+import type { EntityFilters } from "./types/entities.types";
 
-const REVIEW_LABELS: Record<Entity["review_status"], string> = {
-  unreviewed: "Non examiné",
-  accepted_exact: "Correspondance exacte",
-  needs_review: "À examiner",
-  rejected: "Rejeté",
-};
-
-const REVIEW_TONES: Record<Entity["review_status"], string> = {
-  unreviewed: "badge",
-  accepted_exact: "badge--green",
-  needs_review: "badge--amber",
-  rejected: "badge--red",
-};
+const EMPTY_FILTERS: EntityFilters = { search: "", type: "all", confiance: "all" };
 
 export function EntitiesPage() {
-  const { data: entities = [], isLoading } = useEntities();
+  const { data, isPending, isError, refetch } = useEntities();
+  const [filters, setFilters] = useState<EntityFilters>(EMPTY_FILTERS);
+  const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
+
+  const items = useMemo(() => {
+    const search = filters.search.trim().toLowerCase();
+    return (data?.items ?? []).filter((entity) => {
+      if (filters.type !== "all" && entity.type !== filters.type) return false;
+      if (filters.confiance !== "all" && entity.confiance !== filters.confiance) return false;
+      if (!search) return true;
+      return (
+        entity.valeur.toLowerCase().includes(search) ||
+        entity.type.toLowerCase().includes(search)
+      );
+    });
+  }, [data, filters]);
 
   return (
-    <>
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">ANALYSE / CORRÉLATION</p>
-          <h1>Entités &amp; relations</h1>
-          <p className="page-description">
-            Explorez les identifiants rapprochés et les relations justifiées par des preuves.
-          </p>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+      <div>
+        <PageHeader
+          title="Entités & relations"
+          description="Cartographie des entités extraites et leurs liens"
+          actions={(
+            <>
+              <Button variant="secondary" disabled title="Disponible quand l'API d'export sera exposée">
+                <Download /> Exporter graphe
+              </Button>
+              <Button variant="secondary" disabled title="Disponible quand l'API de fusion sera exposée">
+                <Merge /> Fusionner
+              </Button>
+            </>
+          )}
+        />
+
+        <EntitiesFilters filters={filters} onChange={setFilters} />
+
+        <Card>
+          <CardContent className="p-0">
+            {isPending ? <LoadingSkeleton label="Chargement des entités…" /> : null}
+            {isError ? <ErrorState onRetry={() => void refetch()} /> : null}
+            {!isPending && !isError ? (
+              <EntitiesTable entities={items} onSelectEntity={setSelectedEntity} />
+            ) : null}
+          </CardContent>
+        </Card>
       </div>
 
-      <DemoBanner message="Les entités ci-dessous sont fictives : la corrélation exacte n’est pas encore exposée par le moteur." />
-
-      {isLoading ? (
-        <p className="cell-muted">Chargement des entités…</p>
-      ) : entities.length === 0 ? (
-        <div className="empty-panel empty-panel--compact">
-          <div className="empty-symbol" aria-hidden="true">◇</div>
-          <h2>Aucune entité</h2>
-          <p>Les entités apparaîtront ici après une collecte correlée.</p>
-        </div>
-      ) : (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Type</th>
-                <th>Identifiant</th>
-                <th>Normalisé</th>
-                <th>Méthode</th>
-                <th>Statut d’examen</th>
-                <th>Créé le</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entities.map((entity) => (
-                <tr key={entity.id}>
-                  <td className="cell-mono">{entity.id}</td>
-                  <td className="cell-muted">{entity.entity_type}</td>
-                  <td>
-                    <Link to="/entities/$id" params={{ id: entity.id }}>
-                      {entity.raw_identifier}
-                    </Link>
-                  </td>
-                  <td className="cell-mono">{entity.normalized_identifier}</td>
-                  <td className="cell-muted">{entity.normalization_method}</td>
-                  <td>
-                    <span className={`badge ${REVIEW_TONES[entity.review_status]}`}>
-                      {REVIEW_LABELS[entity.review_status]}
-                    </span>
-                  </td>
-                  <td className="cell-muted">{entity.created_at}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </>
+      <EntityDetailPanel entityId={selectedEntity} />
+    </div>
   );
 }

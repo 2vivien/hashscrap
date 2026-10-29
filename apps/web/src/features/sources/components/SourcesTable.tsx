@@ -1,46 +1,96 @@
-import type { Source } from "../types/source.types";
+import {
+  createColumnHelper,
+  createSortedRowModel,
+  rowSortingFeature,
+  tableFeatures,
+  useTable,
+  type SortingState,
+} from "@tanstack/react-table";
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../components/ui/table";
+import { formatDateTime } from "../../../lib/format";
+import { SourceStatusBadge } from "./SourceStatusBadge";
+import { SOURCE_TYPE_LABEL, type Source } from "../types/sources.types";
+
+const features = tableFeatures({
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+});
+
+const helper = createColumnHelper<typeof features, Source>();
+
+const columns = helper.columns([
+  helper.accessor("nom", { header: "Nom" }),
+  helper.accessor("url", {
+    header: "URL",
+    cell: ({ row }) => <span className="mono text-[12px] text-ink-secondary">{row.original.url}</span>,
+  }),
+  helper.accessor("type", {
+    header: "Type",
+    cell: ({ row }) => SOURCE_TYPE_LABEL[row.original.type],
+  }),
+  helper.accessor("statut", {
+    header: "Statut",
+    cell: ({ row }) => <SourceStatusBadge statut={row.original.statut} />,
+  }),
+  helper.accessor("derniere_collecte", {
+    header: "Dernière collecte",
+    cell: ({ row }) =>
+      row.original.derniere_collecte ? formatDateTime(row.original.derniere_collecte) : "—",
+  }),
+  helper.accessor("domaines", {
+    header: "Domaines",
+    cell: ({ row }) => (
+      <span className="text-[12px] text-ink-secondary">{row.original.domaines.join(", ")}</span>
+    ),
+  }),
+]);
 
 export interface SourcesTableProps {
   sources: Source[];
 }
 
-const TYPE_LABELS: Record<Source["type"], string> = {
-  website: "Site web",
-  api: "API",
-  network: "Réseau",
-};
-
 export function SourcesTable({ sources }: SourcesTableProps) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const table = useTable({
+    features,
+    columns,
+    data: sources,
+    state: { sorting },
+    onSortingChange: setSorting,
+  });
+
   return (
-    <div className="table-wrap">
-      <table className="table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Type</th>
-            <th>Statut</th>
-            <th>Domaines autorisés</th>
-            <th>URL de base</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sources.map((source) => (
-            <tr key={source.id}>
-              <td className="cell-mono">{source.id}</td>
-              <td>{source.name}</td>
-              <td className="cell-muted">{TYPE_LABELS[source.type]}</td>
-              <td>
-                <span className={`badge ${source.enabled ? "badge--green" : "badge"}`}>
-                  {source.enabled ? "Activée" : "Désactivée"}
-                </span>
-              </td>
-              <td className="cell-muted">{source.allowed_hosts.join(", ")}</td>
-              <td className="cell-mono">{source.base_url}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table>
+      <TableHeader>
+        {table.getHeaderGroups().map((group) => (
+          <TableRow key={group.id}>
+            {group.headers.map((header) => (
+              <TableHead key={header.id} onClick={header.column.getToggleSortingHandler?.()}>
+                <table.FlexRender header={header} />
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.map((row) => (
+          <TableRow key={row.id}>
+            {row.getAllCells().map((cell) => (
+              <TableCell key={cell.id}>
+                <table.FlexRender cell={cell} />
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }

@@ -156,7 +156,7 @@ def test_evidence_payload_reports_the_size_and_the_status() -> None:
     )
     payload = evidence_out(document, "techcorp.io")
     assert payload.statut == "validee"
-    assert payload.taille == "42,3 Ko"
+    assert payload.taille == 43315
     assert payload.sha256.startswith("aaaa")
 
     without_hash = Document(
@@ -203,7 +203,7 @@ def test_timeline_and_activity_payloads() -> None:
         "C-2025-0423-001 démarrée",
         "techcorp.io",
     )
-    assert event.date == "12 mai 2025"
+    assert event.date == "2025-05-12"
     assert event.heure == "14:23"
 
     activity = activity_out("id", datetime(2025, 5, 12, 14, 23, tzinfo=UTC), "collecte", "x", "y")

@@ -13,7 +13,7 @@ def _constraints(model: Any) -> list[Any]:
     return list(cast("Table", model.__table__).constraints)
 
 
-def test_initial_schema_contains_only_mvp_tables() -> None:
+def test_schema_contains_the_persisted_tables() -> None:
     assert set(Base.metadata.tables) == {
         "sources",
         "crawl_jobs",
@@ -23,6 +23,11 @@ def test_initial_schema_contains_only_mvp_tables() -> None:
         "entities",
         "entity_observations",
         "entity_relationships",
+        "investigations",
+        "investigation_items",
+        "reports",
+        "engine_settings",
+        "audit_events",
     }
 
 

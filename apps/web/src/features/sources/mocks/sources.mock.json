@@ -1,0 +1,59 @@
+{
+  "items": [
+    {
+      "id": "techcorp.io",
+      "nom": "TechCorp Primary",
+      "url": "https://techcorp.io",
+      "type": "web",
+      "statut": "validee",
+      "derniere_collecte": "2025-05-12T14:23:00Z",
+      "domaines": ["techcorp.io", "www.techcorp.io"]
+    },
+    {
+      "id": "api.github.com",
+      "nom": "GitHub API v3",
+      "url": "https://api.github.com/orgs/techcorp",
+      "type": "api",
+      "statut": "validee",
+      "derniere_collecte": "2025-05-12T09:11:00Z",
+      "domaines": ["api.github.com"]
+    },
+    {
+      "id": "darkforum.net",
+      "nom": "Forum OSINT",
+      "url": "https://darkforum.net/tech",
+      "type": "reseau",
+      "statut": "en_attente",
+      "derniere_collecte": "2025-05-11T22:40:00Z",
+      "domaines": ["darkforum.net"]
+    },
+    {
+      "id": "linkedin.com",
+      "nom": "LinkedIn Scraper",
+      "url": "https://linkedin.com/company/techcorp",
+      "type": "web",
+      "statut": "erreur",
+      "derniere_collecte": "2025-05-10T16:02:00Z",
+      "domaines": ["linkedin.com"]
+    },
+    {
+      "id": "api.shodan.io",
+      "nom": "Shodan Assets",
+      "url": "https://api.shodan.io",
+      "type": "api",
+      "statut": "validee",
+      "derniere_collecte": "2025-05-09T11:33:00Z",
+      "domaines": ["api.shodan.io"]
+    },
+    {
+      "id": "pastebin.com",
+      "nom": "Pastebin Monitor",
+      "url": "https://pastebin.com/u/techcorp",
+      "type": "web",
+      "statut": "validee",
+      "derniere_collecte": "2025-05-08T18:44:00Z",
+      "domaines": ["pastebin.com"]
+    }
+  ],
+  "total": 6
+}

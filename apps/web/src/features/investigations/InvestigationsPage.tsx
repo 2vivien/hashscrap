@@ -1,85 +1,75 @@
-import { DemoBanner } from "../../components/ui/DemoBanner";
-import { useInvestigations } from "./api/investigation.queries";
-import type { InvestigationStatus } from "./types/investigation.types";
+import { useMemo, useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
+import { PageHeader } from "../../components/layout/PageHeader";
+import { InvestigationsTable } from "./components/InvestigationsTable";
+import { InvestigationsStats } from "./components/InvestigationsStats";
+import { InvestigationsDistribution } from "./components/InvestigationsDistribution";
+import { useInvestigations } from "./hooks/useInvestigations";
+import type { InvestigationFilters } from "./types/investigations.types";
 
-const STATUS_LABELS: Record<InvestigationStatus, string> = {
-  en_cours: "En cours",
-  en_pause: "En pause",
-  terminee: "Terminée",
-};
+const EMPTY_FILTERS: InvestigationFilters = { search: "" };
 
-const STATUS_TONES: Record<InvestigationStatus, string> = {
-  en_cours: "badge--lime",
-  en_pause: "badge--amber",
-  terminee: "badge--green",
-};
+interface InvestigationsPageProps {
+  // Add any props if needed
+}
 
-export function InvestigationsPage() {
-  const { data: investigations = [], isLoading } = useInvestigations();
+export function InvestigationsPage({}: InvestigationsPageProps) {
+  const { data, isPending, isError, refetch } = useInvestigations();
+  const [filters, setFilters] = useState<InvestigationFilters>(EMPTY_FILTERS);
+
+  const items = useMemo(() => {
+    const search = filters.search.trim().toLowerCase();
+    return (data?.items ?? []).filter((investigation) => {
+      if (!search) return true;
+      return (
+        investigation.nom.toLowerCase().includes(search) ||
+        investigation.description.toLowerCase().includes(search)
+      );
+    });
+  }, [data, filters]);
 
   return (
-    <>
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">ESPACE DE TRAVAIL / DOSSIERS</p>
-          <h1>Investigations</h1>
-          <p className="page-description">
-            Organisez vos objectifs de recherche et leurs sources.
-          </p>
-        </div>
-        <button
-          className="button button--primary"
-          disabled
-          title="Disponible lorsque l’API de création d’investigation sera exposée"
-        >
-          <span aria-hidden="true">＋</span> Nouvelle investigation
-        </button>
+    <div className="space-y-6">
+      <PageHeader
+        title="Investigations"
+        description="Gérez vos dossiers d'enquête et leur périmètre"
+        actions={
+          <Button variant="primary" disabled title="Disponible quand l'API de création sera exposée">
+            <Plus /> Nouvelle investigation
+          </Button>
+        }
+      />
+
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="Rechercher une investigation..."
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          className="max-w-sm"
+          icon={<Search />}
+        />
       </div>
 
-      <DemoBanner message="Les dossiers ci-dessous sont fictifs : les investigations ne sont pas encore persistées par le moteur." />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardContent className="p-0">
+              {isPending ? <LoadingSkeleton label="Chargement des investigations…" /> : null}
+              {isError ? <ErrorState onRetry={() => void refetch()} /> : null}
+              {!isPending && !isError ? <InvestigationsTable investigations={items} /> : null}
+            </CardContent>
+          </Card>
+        </div>
 
-      {isLoading ? (
-        <p className="cell-muted">Chargement des investigations…</p>
-      ) : investigations.length === 0 ? (
-        <div className="empty-panel empty-panel--compact">
-          <div className="empty-symbol" aria-hidden="true">◎</div>
-          <h2>Aucune investigation</h2>
-          <p>Créez un dossier pour regrouper sources, collectes et preuves.</p>
+        <div className="space-y-6">
+          <InvestigationsStats />
+          <InvestigationsDistribution />
         </div>
-      ) : (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nom</th>
-                <th>Description</th>
-                <th>Statut</th>
-                <th>Sources</th>
-                <th>Observations</th>
-                <th>Dernière activité</th>
-              </tr>
-            </thead>
-            <tbody>
-              {investigations.map((investigation) => (
-                <tr key={investigation.id}>
-                  <td className="cell-mono">{investigation.id}</td>
-                  <td>{investigation.name}</td>
-                  <td className="cell-muted">{investigation.description}</td>
-                  <td>
-                    <span className={`badge ${STATUS_TONES[investigation.statut]}`}>
-                      {STATUS_LABELS[investigation.statut]}
-                    </span>
-                  </td>
-                  <td className="cell-muted">{investigation.sources.length}</td>
-                  <td className="cell-muted">{investigation.observations.length}</td>
-                  <td className="cell-muted">{investigation.derniere_activité}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }

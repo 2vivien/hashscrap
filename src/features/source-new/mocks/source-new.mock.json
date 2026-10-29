@@ -1,0 +1,14 @@
+{
+  "form": {
+    "nom": "",
+    "url": "",
+    "type": "web",
+    "domaines": []
+  },
+  "validation": {
+    "protocoleHttps": false,
+    "resolutionDns": false,
+    "accessibilite": false,
+    "maxPages": 10
+  }
+}

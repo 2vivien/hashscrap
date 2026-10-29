@@ -1,15 +1,13 @@
-import type { Rapport } from "../types/rapports.types";
+import {
+  RapportsResponseSchema,
+  type RapportsResponse,
+} from "../validators/rapports.schema";
+import raw from "./rapports.mock.json";
 
-export const MOCK_RAPPORTS: Rapport[] = [
-  {
-    id: "r-2025-04-001",
-    titre: "Rapport d’enquête HashCode - Q2 2025",
-    investigation: "inv-2025-04-001",
-    statut: "validé",
-    généré_le: "2025-04-15T16:00:00Z",
-    format: "markdown",
-    contenu_md:
-      "# HashScrap - Rapport Investigation\n\n## Résumé exécutif\n\nContenu de démonstration.",
-    contenu_json: "{ \"schema_version\": \"1.0\", \"investigation_id\": \"inv-2025-04-001\" }",
-  },
-];
+/**
+ * Typed view over the JSON fixture.
+ *
+ * The contract is applied at load time, so a fixture that drifts from the
+ * schema fails the test suite instead of the interface.
+ */
+export const MOCK_RAPPORTS: RapportsResponse = RapportsResponseSchema.parse(raw);

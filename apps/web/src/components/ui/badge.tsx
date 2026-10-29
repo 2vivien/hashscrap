@@ -12,6 +12,7 @@ const badgeVariants = cva(
         blue: "border-blue/30 bg-blue-dim text-blue",
         green: "border-green/30 bg-green-dim text-green",
         orange: "border-orange/30 bg-orange-dim text-orange",
+        amber: "border-orange/30 bg-orange-dim text-orange",
         red: "border-red/30 bg-red-dim text-red",
         yellow: "border-yellow/30 bg-yellow/15 text-yellow",
         cyan: "border-cyan/30 bg-cyan/15 text-cyan",
@@ -21,12 +22,17 @@ const badgeVariants = cva(
   },
 );
 
-export interface BadgeProps
-  extends HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
+export type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
+
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+  /** `string & {}` garde l'autocompletion des variantes connues. */
+  variant?: BadgeVariant | (string & {});
+}
 
 export function Badge({ className, variant, ...props }: BadgeProps) {
-  return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return (
+    <span className={cn(badgeVariants({ variant: variant as BadgeVariant }), className)} {...props} />
+  );
 }
 
 export { badgeVariants };

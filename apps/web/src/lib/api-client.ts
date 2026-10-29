@@ -1,6 +1,13 @@
 import type { ZodType } from "zod";
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const isServer = typeof document === "undefined";
+
+/**
+ * The server renders with an absolute URL: a relative path cannot be resolved
+ * outside the browser. The browser goes through the dev proxy.
+ */
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? (isServer ? "http://127.0.0.1:8000/api/v1" : "/api/v1");
 
 export class ApiError extends Error {
   readonly status: number;

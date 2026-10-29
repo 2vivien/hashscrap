@@ -1,0 +1,53 @@
+{
+  "items": [
+    {
+      "id": "ENT-2025-0512-001",
+      "valeur": "john.doe@company.com",
+      "type": "email",
+      "observations": 42,
+      "confiance": "elevee",
+      "derniere_detection": "2025-05-12T14:22:00Z"
+    },
+    {
+      "id": "ENT-2025-0512-002",
+      "valeur": "192.168.14.22",
+      "type": "ip",
+      "observations": 18,
+      "confiance": "moyenne",
+      "derniere_detection": "2025-05-12T13:10:00Z"
+    },
+    {
+      "id": "ENT-2025-0512-003",
+      "valeur": "techcorp.io",
+      "type": "domaine",
+      "observations": 67,
+      "confiance": "elevee",
+      "derniere_detection": "2025-05-12T12:45:00Z"
+    },
+    {
+      "id": "ENT-2025-0511-001",
+      "valeur": "John Doe",
+      "type": "personne",
+      "observations": 29,
+      "confiance": "faible",
+      "derniere_detection": "2025-05-11T19:30:00Z"
+    },
+    {
+      "id": "ENT-2025-0510-001",
+      "valeur": "+33 6 12 34 56 78",
+      "type": "telephone",
+      "observations": 7,
+      "confiance": "moyenne",
+      "derniere_detection": "2025-05-10T09:15:00Z"
+    },
+    {
+      "id": "ENT-2025-0509-001",
+      "valeur": "a1b2c3d4e5f6...",
+      "type": "hash",
+      "observations": 12,
+      "confiance": "elevee",
+      "derniere_detection": "2025-05-09T16:00:00Z"
+    }
+  ],
+  "total": 6
+}

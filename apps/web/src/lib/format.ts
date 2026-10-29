@@ -4,6 +4,7 @@ const DATE_FORMAT = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
   month: "2-digit",
   year: "numeric",
+  timeZone: "UTC",
 });
 
 const DATE_TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
@@ -11,6 +12,7 @@ const DATE_TIME_FORMAT = new Intl.DateTimeFormat("fr-FR", {
   month: "2-digit",
   hour: "2-digit",
   minute: "2-digit",
+  timeZone: "UTC",
 });
 
 export function formatDate(value: string | Date): string {

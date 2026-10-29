@@ -1,25 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "../../../lib/api-client";
+import { isMockSource } from "../../../lib/data-source";
 import { MOCK_CHRONOLOGIE } from "../mocks/chronologie.mock";
-import type { EvenementTimeline } from "../types/chronologie.types";
+import {
+  ChronologieResponseSchema,
+  type ChronologieResponse,
+} from "../validators/chronologie.schema";
 
+/** Query keys for the chronologie feature. */
 export const chronologieKeys = {
   all: ["chronologie"] as const,
   list: () => [...chronologieKeys.all, "list"] as const,
-} as const;
+};
 
 export type ChronologieKeys = typeof chronologieKeys;
 
-/**
- * Demo fetcher: the timeline endpoint is not exposed by the engine yet.
- */
-export async function fetchChronologie(): Promise<EvenementTimeline[]> {
-  return MOCK_CHRONOLOGIE;
-}
-
-export function useChronologie() {
-  return useQuery({
-    queryKey: chronologieKeys.list(),
-    queryFn: fetchChronologie,
-    staleTime: 60_000,
-  });
+/** Read the timeline events exposed by the engine. */
+export async function fetchChronologie(signal?: AbortSignal): Promise<ChronologieResponse> {
+  if (isMockSource()) {
+    return MOCK_CHRONOLOGIE;
+  }
+  return apiRequest("/chronologie", ChronologieResponseSchema, { signal });
 }

@@ -1,17 +1,23 @@
-export type PreuveStatus = "validée" | "en_attente" | "erreur";
+export type PreuveStatus = "validee" | "en_attente" | "erreur";
 
 export interface Preuve {
   id: string;
-  aperçu_url: string;
+  url: string;
   source: string;
-  collectée_le: string;
+  collectee_le: string;
   sha256: string;
-  source_details: string;
   statut: PreuveStatus;
-  taille: string;
+  taille: number;
+  apercu_url: string;
 }
 
-export interface PreuveFilters {
-  statut?: PreuveStatus;
-  source?: string;
+export interface PreuvesFilters {
+  search: string;
+  statut: PreuveStatus | "all";
 }
+
+export const PREUVE_STATUS_LABEL: Record<PreuveStatus, string> = {
+  validee: "Validée",
+  en_attente: "En attente",
+  erreur: "Erreur",
+};

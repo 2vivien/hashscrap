@@ -1,17 +1,29 @@
-export type RapportStatus = "brouillon" | "validé" | "exporté";
+export type RapportStatus = "validee" | "en_attente";
+export type RapportFormat = "pdf" | "markdown" | "json";
 
 export interface Rapport {
   id: string;
   titre: string;
   investigation: string;
   statut: RapportStatus;
-  généré_le: string;
-  format: "markdown" | "json";
-  contenu_md: string;
-  contenu_json: string;
+  genere_le: string;
+  format: RapportFormat;
+  contenu: string;
 }
 
-export interface RapportFilters {
-  statut?: RapportStatus;
-  investigation?: string;
+export interface RapportsFilters {
+  search: string;
+  statut: RapportStatus | "all";
+  format: RapportFormat | "all";
 }
+
+export const RAPPORT_STATUS_LABEL: Record<RapportStatus, string> = {
+  validee: "Validée",
+  en_attente: "En attente",
+};
+
+export const RAPPORT_FORMAT_LABEL: Record<RapportFormat, string> = {
+  pdf: "PDF",
+  markdown: "Markdown",
+  json: "JSON",
+};

@@ -1,0 +1,104 @@
+{
+  "stats": {
+    "sources": {
+      "value": 12,
+      "delta": 1
+    },
+    "collectes": {
+      "value": 8,
+      "delta": 324
+    },
+    "observations": {
+      "value": 4892,
+      "delta": 12
+    },
+    "entites": {
+      "value": 156,
+      "delta": 0
+    }
+  },
+  "collectes": [
+    {
+      "id": "C-2025-0423-001",
+      "source": "techcorp.io",
+      "type": "web",
+      "statut": "en_cours",
+      "progression": 35,
+      "pages": 1248,
+      "duree": "1h12m",
+      "demarre": "12/05 14:23"
+    },
+    {
+      "id": "C-2025-0422-014",
+      "source": "api.github.com",
+      "type": "api",
+      "statut": "terminee",
+      "progression": 100,
+      "pages": 3420,
+      "duree": "2h04m",
+      "demarre": "12/05 09:11"
+    },
+    {
+      "id": "C-2025-0421-009",
+      "source": "darkforum.net",
+      "type": "reseau",
+      "statut": "echouee",
+      "progression": 60,
+      "pages": 890,
+      "duree": "0h43m",
+      "demarre": "11/05 22:40"
+    },
+    {
+      "id": "C-2025-0420-003",
+      "source": "linkedin.com",
+      "type": "web",
+      "statut": "terminee",
+      "progression": 100,
+      "pages": 2103,
+      "duree": "1h55m",
+      "demarre": "10/05 16:02"
+    }
+  ],
+  "activite": [
+    {
+      "id": "1",
+      "type": "collecte",
+      "titre": "Collecte démarrée",
+      "detail": "C-2025-0423-001 • techcorp.io",
+      "at": "14:23"
+    },
+    {
+      "id": "2",
+      "type": "entite",
+      "titre": "Nouvelle entité détectée",
+      "detail": "john.doe@company.com",
+      "at": "13:45"
+    },
+    {
+      "id": "3",
+      "type": "source",
+      "titre": "Source validée",
+      "detail": "GitHub API v3",
+      "at": "12:10"
+    },
+    {
+      "id": "4",
+      "type": "rapport",
+      "titre": "Rapport généré",
+      "detail": "Opération TechLeak #4",
+      "at": "09:30"
+    },
+    {
+      "id": "5",
+      "type": "erreur",
+      "titre": "Erreur réseau",
+      "detail": "darkforum.net timeout",
+      "at": "08:15"
+    }
+  ],
+  "points_attention": [
+    "2 sources en erreur nécessitent validation",
+    "Quota API GitHub à 78% ce mois",
+    "4 preuves non vérifiées depuis 3j"
+  ]
+}

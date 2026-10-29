@@ -1,0 +1,92 @@
+{
+  "stats": {
+    "sources": { "value": 12, "delta": "+1 active" },
+    "collectes": { "value": 8, "delta": "+324 cette semaine" },
+    "observations": { "value": 4892, "delta": "+12 nouvelles" },
+    "entites": { "value": 156, "delta": "" }
+  },
+  "collectes": [
+    {
+      "id": "C-2025-0423-001",
+      "source": "techcorp.io",
+      "type": "web",
+      "status": "en_cours",
+      "progress": 35,
+      "pages": 1248,
+      "duration": "1h12m",
+      "started_at": "2025-05-12T14:23:00Z"
+    },
+    {
+      "id": "C-2025-0422-014",
+      "source": "api.github.com",
+      "type": "api",
+      "status": "terminee",
+      "progress": 100,
+      "pages": 3420,
+      "duration": "2h04m",
+      "started_at": "2025-05-12T09:11:00Z"
+    },
+    {
+      "id": "C-2025-0421-009",
+      "source": "darkforum.net",
+      "type": "reseau",
+      "status": "echouee",
+      "progress": 60,
+      "pages": 890,
+      "duration": "0h43m",
+      "started_at": "2025-05-11T22:40:00Z"
+    },
+    {
+      "id": "C-2025-0420-003",
+      "source": "linkedin.com",
+      "type": "web",
+      "status": "terminee",
+      "progress": 100,
+      "pages": 2103,
+      "duration": "1h55m",
+      "started_at": "2025-05-10T16:02:00Z"
+    }
+  ],
+  "activite": [
+    {
+      "id": "act-1",
+      "type": "collecte",
+      "titre": "Collecte démarrée",
+      "detail": "C-2025-0423-001 • techcorp.io",
+      "at": "2025-05-12T14:23:00Z"
+    },
+    {
+      "id": "act-2",
+      "type": "observation",
+      "titre": "Nouvelle entité détectée",
+      "detail": "john.doe@company.com",
+      "at": "2025-05-12T13:45:00Z"
+    },
+    {
+      "id": "act-3",
+      "type": "source",
+      "titre": "Source validée",
+      "detail": "GitHub API v3",
+      "at": "2025-05-12T12:10:00Z"
+    },
+    {
+      "id": "act-4",
+      "type": "rapport",
+      "titre": "Rapport généré",
+      "detail": "Opération TechLeak #4",
+      "at": "2025-05-12T09:30:00Z"
+    },
+    {
+      "id": "act-5",
+      "type": "erreur",
+      "titre": "Erreur réseau",
+      "detail": "darkforum.net timeout",
+      "at": "2025-05-12T08:15:00Z"
+    }
+  ],
+  "points_attention": [
+    "2 sources en erreur nécessitent validation",
+    "Quota API GitHub à 78% ce mois",
+    "4 preuves non vérifiées depuis 3j"
+  ]
+}

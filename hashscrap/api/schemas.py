@@ -138,6 +138,7 @@ class EntityDetailOut(EntityOut):
 
 class TimelineEventOut(ApiModel):
     id: str
+    at: datetime
     date: str
     heure: str
     type: TimelineType
@@ -158,7 +159,7 @@ class EvidenceOut(ApiModel):
     collectee_le: datetime
     sha256: str
     statut: EvidenceStatus
-    taille: str
+    taille: int = Field(ge=0)
     apercu_url: str = ""
 
 
@@ -219,21 +220,26 @@ class CollectorSettingsOut(ApiModel):
 class NetworkSettingsOut(ApiModel):
     proxy: str
     user_agent_rotation: bool
-    robots_txt: str
+    robots_txt: bool
 
 
 class RetentionSettingsOut(ApiModel):
-    preuves: str
-    auto_suppression_logs: str
+    preuves: Literal["90", "365", "illimite"]
+    auto_suppression_logs: AutoSuppressionSettingsOut
+
+
+class AutoSuppressionSettingsOut(ApiModel):
+    active: bool
+    jours: int = Field(ge=0, le=365)
 
 
 class SecuritySettingsOut(ApiModel):
-    reset_warning: str
+    reset_warning: bool
 
 
 class AuditLogLineOut(ApiModel):
     at: str
-    level: str
+    level: Literal["INFO", "DEBUG", "WARN", "ERROR"]
     message: str
 
 
