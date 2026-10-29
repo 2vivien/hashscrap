@@ -26,7 +26,7 @@ export function DashboardPage() {
     <>
       <PageHeader
         title="Bonjour, Julien"
-        description="Voici l'état de vos collectes actives"
+        description={`Voici l'état de vos collectes actives • ${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}`}
         status={
           <span className="mono rounded-full bg-lime-dim px-2 py-1 text-[11px] text-lime">
             Vue d'ensemble • chargé
