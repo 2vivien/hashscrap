@@ -3,6 +3,8 @@ import { Plus, Search } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { Label } from "../../components/ui/label";
 import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
 import { PageHeader } from "../../components/layout/PageHeader";
 import { InvestigationsTable } from "./components/InvestigationsTable";
@@ -15,6 +17,9 @@ export function InvestigationsPage() {
   const { data, isPending, isError, refetch } = useInvestigations();
   const [search, setSearch] = useState("");
   const [extra, setExtra] = useState<Investigation[]>([]);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
 
   const all = useMemo(() => [...extra, ...(data?.items ?? [])], [extra, data]);
 
@@ -28,14 +33,17 @@ export function InvestigationsPage() {
     const now = new Date().toISOString();
     const inv: Investigation = {
       id,
-      nom: "Nouvelle investigation",
-      description: "Dossier créé depuis l'interface",
+      nom: name || "Nouvelle investigation",
+      description: description || "Dossier créé depuis l'interface",
       statut: "en_cours",
       sources: 0,
       observations: 0,
       derniere_activite: now,
     };
     setExtra((current) => [inv, ...current]);
+    setOpen(false);
+    setName("");
+    setDescription("");
   }
 
   return (
@@ -44,7 +52,7 @@ export function InvestigationsPage() {
         title="Investigations"
         description="Gérez vos dossiers d'enquête et leur périmètre"
         actions={
-          <Button variant="primary" onClick={createInvestigation}>
+          <Button variant="primary" onClick={() => setOpen(true)}>
             <Plus /> Nouvelle investigation
           </Button>
         }
@@ -71,6 +79,29 @@ export function InvestigationsPage() {
         <InvestigationsStats />
         <InvestigationsDistribution />
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouvelle investigation</DialogTitle>
+            <DialogDescription>Créez un nouveau dossier d'enquête.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="inv-nom">Nom</Label>
+              <Input id="inv-nom" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom de l'investigation" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="inv-desc">Description</Label>
+              <Input id="inv-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpen(false)}>Annuler</Button>
+            <Button variant="primary" onClick={createInvestigation}>Créer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

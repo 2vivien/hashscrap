@@ -4,7 +4,6 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
 import { PageHeader } from "../../components/layout/PageHeader";
-import { useToast } from "../../components/ui/toast";
 import { ChronologieFilters } from "./components/ChronologieFilters";
 import { ChronologieTimeline } from "./components/ChronologieTimeline";
 import { useChronologie } from "./hooks/useChronologie";
@@ -13,9 +12,9 @@ import type { ChronologieFilters as ChronologieFiltersValues } from "./types/chr
 const EMPTY_FILTERS: ChronologieFiltersValues = { startDate: "", endDate: "" };
 
 export function ChronologiePage() {
-  const { push } = useToast();
   const { data, isPending, isError, refetch } = useChronologie();
   const [filters, setFilters] = useState<ChronologieFiltersValues>(EMPTY_FILTERS);
+  const [showFilters, setShowFilters] = useState(false);
 
   const items = useMemo(() => {
     return (data?.items ?? []).filter((event) => {
@@ -33,14 +32,14 @@ export function ChronologiePage() {
         actions={(
           <Button
           variant="secondary"
-          onClick={() => push({ title: "Filtrage par type", description: "Cette action sera disponible quand le moteur sera connecté." })}
+          onClick={() => setShowFilters((v) => !v)}
         >
             <Filter /> Filtrer par type
           </Button>
         )}
       />
 
-      <ChronologieFilters filters={filters} onChange={setFilters} />
+      {showFilters ? <ChronologieFilters filters={filters} onChange={setFilters} /> : null}
 
       <Card>
         <CardContent className="p-0">

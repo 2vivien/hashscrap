@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
@@ -11,6 +14,8 @@ import type { Rapport } from "./types/rapports.types";
 export function RapportsPage() {
   const { data, isPending, isError, refetch } = useRapports();
   const [extra, setExtra] = useState<Rapport[]>([]);
+  const [open, setOpen] = useState(false);
+  const [titre, setTitre] = useState("");
 
   const items = useMemo(() => [...extra, ...(data?.items ?? [])], [extra, data]);
 
@@ -19,7 +24,7 @@ export function RapportsPage() {
     const now = new Date().toISOString();
     const rapport: Rapport = {
       id,
-      titre: "Nouveau rapport",
+      titre: titre || "Nouveau rapport",
       investigation: "Opération TechLeak",
       statut: "en_attente",
       genere_le: now,
@@ -27,6 +32,8 @@ export function RapportsPage() {
       contenu: "# Nouveau rapport\n\nContenu à générer.",
     };
     setExtra((current) => [rapport, ...current]);
+    setOpen(false);
+    setTitre("");
   }
 
   return (
@@ -35,7 +42,7 @@ export function RapportsPage() {
         title="Rapports"
         description="Générez des livrables d'investigation"
         actions={
-          <Button variant="primary" onClick={createRapport}>
+          <Button variant="primary" onClick={() => setOpen(true)}>
             <Plus /> Nouveau rapport
           </Button>
         }
@@ -48,6 +55,23 @@ export function RapportsPage() {
           {!isPending && !isError ? <RapportsTable rapports={items} /> : null}
         </CardContent>
       </Card>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau rapport</DialogTitle>
+            <DialogDescription>Générez un livrable d'investigation.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="rapport-titre">Titre</Label>
+            <Input id="rapport-titre" value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Titre du rapport" />
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpen(false)}>Annuler</Button>
+            <Button variant="primary" onClick={createRapport}>Générer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

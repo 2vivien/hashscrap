@@ -35,7 +35,7 @@ export function CollecteDetailPage({ id }: CollecteDetailPageProps) {
             </div>
             <Button
               variant="primary"
-              onClick={() => alert("Relance de la collecte : cette action sera disponible quand le moteur sera connecté.")}
+              onClick={() => alert("La collecte a été relancée (simulation).")}
             >
               Relancer
             </Button>
