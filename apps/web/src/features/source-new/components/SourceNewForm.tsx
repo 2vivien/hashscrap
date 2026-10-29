@@ -13,7 +13,7 @@ export interface SourceNewFormProps {
 }
 
 export function SourceNewForm({ defaults = { nom: "", url: "", type: "web", domaines: [] }, onSubmit }: SourceNewFormProps) {
-  const { register, control, handleSubmit, setValue, watch, formState } = useForm<SourceNewFormPayload>({
+  const { register, handleSubmit, setValue, watch, formState } = useForm<SourceNewFormPayload>({
     resolver: zodResolver(SourceNewFormSchema),
     defaultValues: defaults,
   });
