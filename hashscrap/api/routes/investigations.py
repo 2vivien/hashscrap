@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from sqlalchemy import func, select
 
 from hashscrap.api.deps import session_scope
-from hashscrap.api.schemas import InvestigationsResponse
+from hashscrap.api.schemas import InvestigationCreateIn, InvestigationOut, InvestigationsResponse
 from hashscrap.api.serializers import investigation_out
 from hashscrap.models import (
     CrawlJob,
@@ -17,6 +17,20 @@ from hashscrap.models import (
 )
 
 router = APIRouter(prefix="/investigations", tags=["investigations"])
+
+
+@router.post("", response_model=InvestigationOut, status_code=201)
+def create_investigation(payload: InvestigationCreateIn) -> InvestigationOut:
+    with session_scope() as session:
+        investigation = Investigation(
+            name=payload.nom,
+            description=payload.description,
+            status="en_cours",
+        )
+        session.add(investigation)
+        session.commit()
+        session.refresh(investigation)
+        return investigation_out(investigation, 0, 0)
 
 
 @router.get("", response_model=InvestigationsResponse)

@@ -9,6 +9,7 @@ import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
 import { PageHeader } from "../../components/layout/PageHeader";
 import { RapportsTable } from "./components/RapportsTable";
 import { useRapports } from "./hooks/useRapports";
+import { generateRapport } from "./api/rapports.queries";
 import type { Rapport } from "./types/rapports.types";
 
 export function RapportsPage() {
@@ -19,21 +20,15 @@ export function RapportsPage() {
 
   const items = useMemo(() => [...extra, ...(data?.items ?? [])], [extra, data]);
 
-  function createRapport() {
-    const id = `r-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(extra.length + 1).padStart(3, "0")}`;
-    const now = new Date().toISOString();
-    const rapport: Rapport = {
-      id,
-      titre: titre || "Nouveau rapport",
-      investigation: "Opération TechLeak",
-      statut: "en_attente",
-      genere_le: now,
-      format: "markdown",
-      contenu: "# Nouveau rapport\n\nContenu à générer.",
-    };
-    setExtra((current) => [rapport, ...current]);
-    setOpen(false);
-    setTitre("");
+  async function handleCreate() {
+    try {
+      const rapport = await generateRapport({ titre: titre || "Nouveau rapport", investigation: "Opération TechLeak" });
+      setExtra((current) => [rapport, ...current]);
+      setOpen(false);
+      setTitre("");
+    } catch (err) {
+      alert(`Erreur : ${err}`);
+    }
   }
 
   return (
@@ -68,7 +63,7 @@ export function RapportsPage() {
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setOpen(false)}>Annuler</Button>
-            <Button variant="primary" onClick={createRapport}>Générer</Button>
+            <Button variant="primary" onClick={handleCreate}>Générer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

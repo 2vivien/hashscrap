@@ -27,6 +27,38 @@ class ApiModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+# --- Input schemas (write operations) ---
+
+
+class SourceCreateIn(ApiModel):
+    nom: str = Field(min_length=1, max_length=120)
+    url: str = Field(min_length=1, max_length=4096)
+    type: CollecteType = "web"
+    domaines: list[str] = Field(default_factory=list, min_length=1)
+
+
+class CollecteLaunchIn(ApiModel):
+    source: str = Field(min_length=1)
+    url: str = Field(min_length=1, max_length=4096)
+
+
+class InvestigationCreateIn(ApiModel):
+    nom: str = Field(min_length=1, max_length=160)
+    description: str = ""
+
+
+class RapportGenerateIn(ApiModel):
+    titre: str = Field(min_length=1, max_length=200)
+    investigation: str = ""
+
+
+class ParametresUpdateIn(ApiModel):
+    collecteur: CollectorSettingsOut | None = None
+    reseau: NetworkSettingsOut | None = None
+    conservation: RetentionSettingsOut | None = None
+    securite: SecuritySettingsOut | None = None
+
+
 class CollecteOut(ApiModel):
     id: str
     source: str

@@ -1,7 +1,7 @@
 import { apiRequest } from "../../../lib/api-client";
 import { isMockSource } from "../../../lib/data-source";
 import { MOCK_SOURCES } from "../mocks/sources.mock";
-import { SourcesResponseSchema, type SourcesResponse } from "../validators/sources.schema";
+import { SourceSchema, SourcesResponseSchema, type SourcePayload, type SourcesResponse } from "../validators/sources.schema";
 
 export const sourcesKeys = {
   all: ["sources"] as const,
@@ -17,4 +17,25 @@ export async function fetchSources(signal?: AbortSignal): Promise<SourcesRespons
     return MOCK_SOURCES;
   }
   return apiRequest("/sources", SourcesResponseSchema, { signal });
+}
+
+/** Create a new source in the engine. */
+export async function createSource(payload: {
+  nom: string;
+  url: string;
+  type: string;
+  domaines: string[];
+}): Promise<SourcePayload> {
+  if (isMockSource()) {
+    return {
+      id: payload.nom.toLowerCase().replace(/ /g, "-"),
+      nom: payload.nom,
+      url: payload.url,
+      type: payload.type as SourcePayload["type"],
+      statut: "validee",
+      derniere_collecte: null,
+      domaines: payload.domaines,
+    };
+  }
+  return apiRequest("/sources", SourceSchema, { method: "POST", body: payload });
 }

@@ -21,3 +21,21 @@ export const investigationsKeys = {
 };
 
 export type InvestigationsKeys = typeof investigationsKeys;
+
+/** Create a new investigation in the engine. */
+export async function createInvestigation(payload: { nom: string; description: string }) {
+  if (isMockSource()) {
+    return {
+      id: `inv-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-001`,
+      nom: payload.nom,
+      description: payload.description,
+      statut: "en_cours" as const,
+      sources: 0,
+      observations: 0,
+      derniere_activite: new Date().toISOString(),
+    };
+  }
+  const { apiRequest } = await import("../../../lib/api-client");
+  const { InvestigationSchema } = await import("../validators/investigations.schema");
+  return apiRequest("/investigations", InvestigationSchema, { method: "POST", body: payload });
+}

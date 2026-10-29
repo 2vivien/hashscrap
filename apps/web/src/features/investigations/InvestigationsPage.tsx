@@ -11,6 +11,7 @@ import { InvestigationsTable } from "./components/InvestigationsTable";
 import { InvestigationsStats } from "./components/InvestigationsStats";
 import { InvestigationsDistribution } from "./components/InvestigationsDistribution";
 import { useInvestigations } from "./hooks/useInvestigations";
+import { createInvestigation } from "./api/investigations.queries";
 import type { Investigation } from "./types/investigations.types";
 
 export function InvestigationsPage() {
@@ -28,22 +29,16 @@ export function InvestigationsPage() {
     return all.filter((inv) => !q || inv.nom.toLowerCase().includes(q) || inv.description.toLowerCase().includes(q));
   }, [all, search]);
 
-  function createInvestigation() {
-    const id = `inv-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(extra.length + 1).padStart(3, "0")}`;
-    const now = new Date().toISOString();
-    const inv: Investigation = {
-      id,
-      nom: name || "Nouvelle investigation",
-      description: description || "Dossier créé depuis l'interface",
-      statut: "en_cours",
-      sources: 0,
-      observations: 0,
-      derniere_activite: now,
-    };
-    setExtra((current) => [inv, ...current]);
-    setOpen(false);
-    setName("");
-    setDescription("");
+  async function handleCreate() {
+    try {
+      const inv = await createInvestigation({ nom: name || "Nouvelle investigation", description: description || "Dossier créé depuis l'interface" });
+      setExtra((current) => [inv, ...current]);
+      setOpen(false);
+      setName("");
+      setDescription("");
+    } catch (err) {
+      alert(`Erreur : ${err}`);
+    }
   }
 
   return (
@@ -98,7 +93,7 @@ export function InvestigationsPage() {
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setOpen(false)}>Annuler</Button>
-            <Button variant="primary" onClick={createInvestigation}>Créer</Button>
+            <Button variant="primary" onClick={handleCreate}>Créer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

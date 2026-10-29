@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from hashscrap.api.deps import session_scope
-from hashscrap.api.schemas import SourceOut, SourcesResponse, SourceStatus
+from hashscrap.api.schemas import SourceCreateIn, SourceOut, SourceStatus, SourcesResponse
 from hashscrap.api.serializers import source_out
 from hashscrap.models import CrawlJob, CrawlRun, Source
 
@@ -33,6 +33,22 @@ def _last_run(session: Session, source_id: object) -> CrawlRun | None:
         .order_by(CrawlRun.started_at.desc())
         .limit(1)
     )
+
+
+@router.post("", response_model=SourceOut, status_code=201)
+def create_source(payload: SourceCreateIn) -> SourceOut:
+    with session_scope() as session:
+        source = Source(
+            source_key=payload.nom.lower().replace(" ", "-"),
+            source_type=payload.type,
+            base_url=payload.url,
+            enabled=True,
+            policy_config={"allowed_hosts": payload.domaines, "name": payload.nom},
+        )
+        session.add(source)
+        session.commit()
+        session.refresh(source)
+        return source_out(source, "validee", None)
 
 
 @router.get("", response_model=SourcesResponse)

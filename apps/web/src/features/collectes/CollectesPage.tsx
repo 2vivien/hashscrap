@@ -10,6 +10,7 @@ import { PageHeader } from "../../components/layout/PageHeader";
 import { CollectesFilters } from "./components/CollectesFilters";
 import { CollectesTable } from "./components/CollectesTable";
 import { useCollectes } from "./hooks/useCollectes";
+import { launchCollecte } from "./api/collectes.queries";
 import type { Collecte, CollecteFilters } from "./types/collectes.types";
 
 const EMPTY_FILTERS: CollecteFilters = { search: "", status: "all", type: "all" };
@@ -36,22 +37,15 @@ export function CollectesPage() {
     });
   }, [all, filters]);
 
-  function launchCollecte() {
-    const id = `C-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(extra.length + 1).padStart(3, "0")}`;
-    const now = new Date().toISOString();
-    const collecte: Collecte = {
-      id,
-      source: source || "techcorp.io",
-      type: "web",
-      status: "en_cours",
-      progress: 0,
-      pages: 0,
-      duration: "0h00m",
-      started_at: now,
-    };
-    setExtra((current) => [collecte, ...current]);
-    setOpen(false);
-    setUrl("");
+  async function handleLaunch() {
+    try {
+      const collecte = await launchCollecte({ source: source || "techcorp.io", url: url || "https://techcorp.io" });
+      setExtra((current) => [collecte, ...current]);
+      setOpen(false);
+      setUrl("");
+    } catch (err) {
+      alert(`Erreur : ${err}`);
+    }
   }
 
   return (
@@ -96,7 +90,7 @@ export function CollectesPage() {
           </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setOpen(false)}>Annuler</Button>
-            <Button variant="primary" onClick={launchCollecte}>Lancer</Button>
+            <Button variant="primary" onClick={handleLaunch}>Lancer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

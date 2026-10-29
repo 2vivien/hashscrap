@@ -1,14 +1,16 @@
 /**
  * Data source used by the feature hooks.
  *
- * The interface runs standalone on typed JSON fixtures. The engine API is
- * intentionally not consumed here: the mock data is the source of truth for
- * the frontend until a backend contract is approved.
+ * `api` reads the versioned engine API. `mock` reads the typed JSON fixtures
+ * shipped with each feature, which keeps the interface usable when the
+ * engine is not reachable.
  */
-export type DataSource = "mock";
+export type DataSource = "api" | "mock";
 
-export const dataSource: DataSource = "mock";
+const configured = import.meta.env.VITE_DATA_SOURCE;
+
+export const dataSource: DataSource = configured === "mock" ? "mock" : "api";
 
 export function isMockSource(): boolean {
-  return true;
+  return dataSource === "mock";
 }

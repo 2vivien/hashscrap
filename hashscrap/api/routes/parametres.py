@@ -15,6 +15,7 @@ from hashscrap.api.schemas import (
     CollectorSettingsOut,
     NetworkSettingsOut,
     ParametresOut,
+    ParametresUpdateIn,
     RetentionSettingsOut,
     SecuritySettingsOut,
 )
@@ -56,6 +57,41 @@ def _stored(session: object, key: str) -> dict[str, object]:
     if setting is None:
         return {}
     return settings_from_payload(setting.value)
+
+
+@router.put("", response_model=ParametresOut)
+def update_parametres(payload: ParametresUpdateIn) -> ParametresOut:
+    with session_scope() as session:
+        if payload.collecteur is not None:
+            setting = session.get(EngineSetting, "collecteur")
+            if setting is None:
+                setting = EngineSetting(key="collecteur", value=payload.collecteur.model_dump())
+                session.add(setting)
+            else:
+                setting.value = payload.collecteur.model_dump()
+        if payload.reseau is not None:
+            setting = session.get(EngineSetting, "reseau")
+            if setting is None:
+                setting = EngineSetting(key="reseau", value=payload.reseau.model_dump())
+                session.add(setting)
+            else:
+                setting.value = payload.reseau.model_dump()
+        if payload.conservation is not None:
+            setting = session.get(EngineSetting, "conservation")
+            if setting is None:
+                setting = EngineSetting(key="conservation", value=payload.conservation.model_dump())
+                session.add(setting)
+            else:
+                setting.value = payload.conservation.model_dump()
+        if payload.securite is not None:
+            setting = session.get(EngineSetting, "securite")
+            if setting is None:
+                setting = EngineSetting(key="securite", value=payload.securite.model_dump())
+                session.add(setting)
+            else:
+                setting.value = payload.securite.model_dump()
+        session.commit()
+    return get_parametres()
 
 
 @router.get("", response_model=ParametresOut)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
@@ -12,6 +12,8 @@ from hashscrap.api.schemas import (
     CollecteDetailOut,
     CollecteErrorOut,
     CollecteEventOut,
+    CollecteLaunchIn,
+    CollecteOut,
     CollectesResponse,
 )
 from hashscrap.api.serializers import collecte_detail_out, collecte_out, job_reference
@@ -20,6 +22,43 @@ from hashscrap.models import CrawlJob, CrawlRun, Observation, Source
 router = APIRouter(prefix="/collectes", tags=["collectes"])
 
 MAX_EVENTS = 200
+
+
+@router.post("", response_model=CollecteOut, status_code=201)
+def launch_collecte(payload: CollecteLaunchIn) -> CollecteOut:
+    from datetime import UTC, datetime
+
+    from hashscrap.models import CrawlJob, CrawlRun, Source
+
+    with session_scope() as session:
+        source = session.scalar(select(Source).where(Source.source_key == payload.source))
+        if source is None:
+            raise HTTPException(status_code=404, detail="source introuvable")
+        job = CrawlJob(
+            reference=f"C-{datetime.now(UTC).strftime('%Y%m%d')}-{uuid4().hex[:6].upper()}",
+            input_url=payload.url,
+            source_id=source.id,
+            status="running",
+            attempts=1,
+            max_attempts=3,
+            idempotency_key=f"demo:{uuid4()}",
+            target_pages=100,
+        )
+        session.add(job)
+        session.commit()
+        session.refresh(job)
+        run = CrawlRun(
+            job_id=job.id,
+            status="running",
+            started_at=datetime.now(UTC),
+            fetched_count=0,
+            failed_count=0,
+            bytes_received=0,
+            config_snapshot={},
+        )
+        session.add(run)
+        session.commit()
+        return collecte_out(job, run, source)
 
 
 @router.get("", response_model=CollectesResponse)
