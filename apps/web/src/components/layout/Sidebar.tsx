@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { navItems } from "./nav-items";
 import { cn } from "../../lib/cn";
-import { SystemStatus } from "./SystemStatus";
 
 export interface SidebarProps {
   onNavigate?: () => void;
@@ -51,10 +50,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           })}
         </ul>
       </nav>
-
-      <div className="px-3 pb-3">
-        <SystemStatus />
-      </div>
 
       <div className="flex items-center gap-2.5 border-t border-line px-4 py-3">
         <span className="grid size-8 place-items-center rounded-full bg-card-2 text-[12px] font-semibold text-ink">
