@@ -1,7 +1,11 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useToast } from "../../components/ui/toast";
 import { Button } from "../../components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
 import { PageHeader } from "../../components/layout/PageHeader";
 import { ActivityFeed } from "./components/ActivityFeed";
@@ -12,6 +16,9 @@ import { useDashboard } from "./hooks/useDashboard";
 import type { Collecte } from "../collectes/types/collectes.types";
 
 export function DashboardPage() {
+  const [open, setOpen] = useState(false);
+  const [source, setSource] = useState("techcorp.io");
+  const [url, setUrl] = useState("");
   const { push } = useToast();
   const { data, isPending, isError, refetch } = useDashboard();
 
@@ -39,16 +46,7 @@ export function DashboardPage() {
             <Button asChild variant="secondary">
               <Link to="/collectes">Voir collectes</Link>
             </Button>
-            <Button
-              variant="primary"
-              onClick={() =>
-                push({
-                  title: "Lancement de collecte",
-                  description: "Cette action sera disponible quand le moteur sera connecté.",
-                  variant: "info",
-                })
-              }
-            >
+            <Button variant="primary" onClick={() => setOpen(true)}>
               <Plus /> Nouvelle collecte
             </Button>
           </>
@@ -64,6 +62,29 @@ export function DashboardPage() {
           <AttentionPoints points={data.points_attention} />
         </div>
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Lancer une collecte</DialogTitle>
+            <DialogDescription>Configurez une nouvelle collecte bornée.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="dash-source">Source</Label>
+              <Input id="dash-source" value={source} onChange={(e) => setSource(e.target.value)} placeholder="techcorp.io" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="dash-url">URL de départ</Label>
+              <Input id="dash-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://techcorp.io" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setOpen(false)}>Annuler</Button>
+            <Button variant="primary" onClick={() => { setOpen(false); setUrl(""); push({ title: "Collecte lancée", description: `${source} a été ajoutée.`, variant: "success" }); }}>Lancer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
