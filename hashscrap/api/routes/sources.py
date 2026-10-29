@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from hashscrap.api.deps import session_scope
-from hashscrap.api.schemas import SourceCreateIn, SourceOut, SourceStatus, SourcesResponse
+from hashscrap.api.schemas import SourceCreateIn, SourceOut, SourcesResponse, SourceStatus
 from hashscrap.api.serializers import source_out
 from hashscrap.models import CrawlJob, CrawlRun, Source
 
