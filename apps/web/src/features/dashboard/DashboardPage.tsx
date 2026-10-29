@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
+import { useToast } from "../../components/ui/toast";
 import { Button } from "../../components/ui/button";
 import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
 import { PageHeader } from "../../components/layout/PageHeader";
@@ -11,6 +12,7 @@ import { useDashboard } from "./hooks/useDashboard";
 import type { Collecte } from "../collectes/types/collectes.types";
 
 export function DashboardPage() {
+  const { push } = useToast();
   const { data, isPending, isError, refetch } = useDashboard();
 
   if (isPending) {
@@ -39,8 +41,13 @@ export function DashboardPage() {
             </Button>
             <Button
               variant="primary"
-              disabled
-              title="Disponible quand l'API de lancement de collecte sera exposée"
+              onClick={() =>
+                push({
+                  title: "Lancement de collecte",
+                  description: "Cette action sera disponible quand le moteur sera connecté.",
+                  variant: "info",
+                })
+              }
             >
               <Plus /> Nouvelle collecte
             </Button>

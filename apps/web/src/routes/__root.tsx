@@ -7,6 +7,7 @@ import {
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { AppShell } from "../components/layout/AppShell";
+import { ToastProvider } from "../components/ui/toast";
 import { TooltipProvider } from "../components/ui/tooltip";
 import { createQueryClient } from "../lib/query-client";
 import "../styles.css";
@@ -17,9 +18,11 @@ function RootComponent() {
     <RootDocument>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider delayDuration={200}>
-          <AppShell>
-            <Outlet />
-          </AppShell>
+          <ToastProvider>
+            <AppShell>
+              <Outlet />
+            </AppShell>
+          </ToastProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </RootDocument>

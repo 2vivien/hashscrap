@@ -33,7 +33,10 @@ export function CollecteDetailPage({ id }: CollecteDetailPageProps) {
                 Source {data?.source} • type {data?.type ? COLLECTE_TYPE_LABEL[data.type] : ""}
               </p>
             </div>
-            <Button variant="primary" disabled title="Disponible quand l'API de relance sera exposée">
+            <Button
+              variant="primary"
+              onClick={() => alert("Relance de la collecte : cette action sera disponible quand le moteur sera connecté.")}
+            >
               Relancer
             </Button>
           </div>

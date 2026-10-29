@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { useToast } from "../../components/ui/toast";
 import { EntitiesFilters } from "./components/EntitiesFilters";
 import { EntitiesTable } from "./components/EntitiesTable";
 import { EntityDetailPanel } from "./components/EntityDetailPanel";
@@ -13,6 +14,7 @@ import type { EntityFilters } from "./types/entities.types";
 const EMPTY_FILTERS: EntityFilters = { search: "", type: "all", confiance: "all" };
 
 export function EntitiesPage() {
+  const { push } = useToast();
   const { data, isPending, isError, refetch } = useEntities();
   const [filters, setFilters] = useState<EntityFilters>(EMPTY_FILTERS);
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
@@ -38,10 +40,16 @@ export function EntitiesPage() {
           description="Cartographie des entités extraites et leurs liens"
           actions={(
             <>
-              <Button variant="secondary" disabled title="Disponible quand l'API d'export sera exposée">
+              <Button
+                variant="secondary"
+                onClick={() => push({ title: "Export du graphe", description: "Cette action sera disponible quand le moteur sera connecté." })}
+              >
                 <Download /> Exporter graphe
               </Button>
-              <Button variant="secondary" disabled title="Disponible quand l'API de fusion sera exposée">
+              <Button
+                variant="secondary"
+                onClick={() => push({ title: "Fusion d'entités", description: "Cette action sera disponible quand le moteur sera connecté." })}
+              >
                 <Merge /> Fusionner
               </Button>
             </>

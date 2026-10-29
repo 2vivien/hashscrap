@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { ErrorState, LoadingSkeleton } from "../../components/ui/state";
 import { PageHeader } from "../../components/layout/PageHeader";
+import { useToast } from "../../components/ui/toast";
 import { CollectesFilters } from "./components/CollectesFilters";
 import { CollectesTable } from "./components/CollectesTable";
 import { useCollectes } from "./hooks/useCollectes";
@@ -12,6 +13,7 @@ import type { CollecteFilters } from "./types/collectes.types";
 const EMPTY_FILTERS: CollecteFilters = { search: "", status: "all", type: "all" };
 
 export function CollectesPage() {
+  const { push } = useToast();
   const { data, isPending, isError, refetch } = useCollectes();
   const [filters, setFilters] = useState<CollecteFilters>(EMPTY_FILTERS);
 
@@ -33,7 +35,10 @@ export function CollectesPage() {
         title="Collectes"
         description="Liste des jobs d'acquisition • Bounded collection"
         actions={
-          <Button variant="primary" disabled title="Disponible quand l'API de lancement sera exposée">
+          <Button
+            variant="primary"
+            onClick={() => push({ title: "Lancement de collecte", description: "Cette action sera disponible quand le moteur sera connecté." })}
+          >
             <Plus /> Lancer une collecte
           </Button>
         }
