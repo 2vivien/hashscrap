@@ -9,17 +9,20 @@ import { SourcesFilters } from "./components/SourcesFilters";
 import { SourcesSidePanel } from "./components/SourcesSidePanel";
 import { SourcesTable } from "./components/SourcesTable";
 import { useSources } from "./hooks/useSources";
-import type { SourceFilters } from "./types/sources.types";
+import type { Source, SourceFilters } from "./types/sources.types";
 
 const EMPTY_FILTERS: SourceFilters = { search: "", type: "all", statut: "all" };
 
 export function SourcesPage() {
   const { data, isPending, isError, refetch } = useSources();
   const [filters, setFilters] = useState<SourceFilters>(EMPTY_FILTERS);
+  const [extra] = useState<Source[]>([]);
+
+  const all = useMemo(() => [...extra, ...(data?.items ?? [])], [extra, data]);
 
   const sources = useMemo(() => {
     const search = filters.search.trim().toLowerCase();
-    return (data?.items ?? []).filter((source) => {
+    return all.filter((source) => {
       if (filters.type !== "all" && source.type !== filters.type) return false;
       if (filters.statut !== "all" && source.statut !== filters.statut) return false;
       if (!search) return true;
@@ -29,7 +32,7 @@ export function SourcesPage() {
         source.domaines.some((domain) => domain.toLowerCase().includes(search))
       );
     });
-  }, [data, filters]);
+  }, [all, filters]);
 
   return (
     <>

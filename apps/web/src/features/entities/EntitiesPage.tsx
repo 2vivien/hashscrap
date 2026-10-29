@@ -42,7 +42,15 @@ export function EntitiesPage() {
             <>
               <Button
                 variant="secondary"
-                onClick={() => push({ title: "Export du graphe", description: "Cette action sera disponible quand le moteur sera connecté." })}
+                onClick={() => {
+                  const blob = new Blob([JSON.stringify(data?.items ?? [], null, 2)], { type: "application/json" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "entites.json";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
               >
                 <Download /> Exporter graphe
               </Button>
