@@ -51,18 +51,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </ul>
       </nav>
 
-      <div className="flex items-center gap-2.5 border-t border-line px-4 py-3">
-        <span className="grid size-8 place-items-center rounded-full bg-card-2 text-[12px] font-semibold text-ink">
-          JD
-        </span>
-        <span className="leading-tight">
-          <span className="block text-[13px] font-medium text-ink">Julien D.</span>
-          <span className="flex items-center gap-1.5 text-[11px] text-ink-muted">
-            <span className="size-1.5 rounded-full bg-green" />
-            v1.0.0 · Live
-          </span>
-        </span>
-      </div>
+
     </aside>
   );
 }
