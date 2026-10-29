@@ -51,7 +51,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </ul>
       </nav>
 
-
+      <div className="border-t border-line px-4 py-3">
+        <p className="text-[10px] tracking-[0.18em] text-ink-muted">HASHSCRAP · BOUNDED ENGINE</p>
+      </div>
     </aside>
   );
 }
